@@ -1,763 +1,1332 @@
 <!DOCTYPE html>
+
 <html lang="id" class="dark">
 
-<head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>BINI Syariah (Professional Banking System)</title>
+​<head>
 
- <!-- KONFIGURASI PWA -->
- <link rel="manifest" href="./manifest.json">
- <meta name="theme-color" content="#020617">
+<meta charset="UTF-8">
 
- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
- <!-- LIBRARY SCANNER QR -->
- <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>BINI Syariah - Administrator System</title>
+
+​<!-- KONFIGURASI PWA ADMIN -->
+
+<link rel="manifest" href="./manifest.json">
+
+<meta name="theme-color" content="#020617">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+​<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- LIBRARY SCANNER QR -->
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
 </head>
 
-<body class="bg-slate-950 text-slate-100 antialiased selection:bg-orange-500 selection:text-white">
- <div class="max-w-md mx-auto min-h-screen bg-slate-900 shadow-2xl shadow-black/80 flex flex-col justify-between relative overflow-x-hidden border-x border-slate-800/80 pb-20">
-  
-  <div id="drawerBackdrop" onclick="toggleDrawer(false)" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-40 hidden transition-opacity duration-300 opacity-0"></div>
-  
-  <!-- HAMBURGER MENU DRAWER ADMIN -->
-  <aside id="navDrawer" class="fixed top-0 left-0 bottom-0 w-72 max-w-[82vw] bg-slate-950 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between">
-   <div>
-    <div class="p-6 bg-gradient-to-br from-slate-900 to-orange-950/60 border-b border-slate-800">
-     <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center space-x-2.5">
-       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-extrabold text-base tracking-tighter shadow-lg shadow-orange-500/30 border border-orange-400/40">
-        69
-       </div>
-       <div>
-        <span class="font-extrabold tracking-tight text-sm text-white block leading-tight">BINI <span class="text-orange-400">Syariah</span></span>
-        <span class="text-[9px] text-orange-300 font-semibold tracking-wider block uppercase">Suami Cari, Istri Menikmati</span>
-       </div>
-      </div>
-      <button onclick="toggleDrawer(false)" class="w-8 h-8 rounded-full bg-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center transition">
-       <i class="fa-solid fa-xmark"></i>
-      </button>
-     </div>
-    </div>
-    
-    <nav class="p-4 space-y-1.5">
-     <button onclick="toggleDrawer(false); switchAdminTab('dashboard')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
-      <i class="fa-solid fa-chart-pie w-5 text-center text-orange-400"></i>
-      <span class="text-xs font-semibold">Dashboard & Statistik</span>
-     </button>
-     <button onclick="toggleDrawer(false); switchAdminTab('transaksi')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
-      <i class="fa-solid fa-money-bill-transfer w-5 text-center text-emerald-400"></i>
-      <span class="text-xs font-semibold">Input Transaksi (011)</span>
-     </button>
-     <button onclick="toggleDrawer(false); switchAdminTab('nasabah')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
-      <i class="fa-solid fa-users w-5 text-center text-amber-400"></i>
-      <span class="text-xs font-semibold">Data Nasabah</span>
-     </button>
-     <button onclick="toggleDrawer(false); switchAdminTab('broadcast')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
-      <i class="fa-solid fa-bullhorn w-5 text-center text-sky-400"></i>
-      <span class="text-xs font-semibold">Broadcast & Pengumuman</span>
-     </button>
-     <!-- MENU KAS BANK DI BURGER -->
-     <button onclick="toggleDrawer(false); openKasBankModal()" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-orange-400 hover:bg-orange-500 hover:text-white transition text-left">
-      <i class="fa-solid fa-vault w-5 text-center text-orange-400"></i>
-      <span class="text-xs font-bold">Kas Pusat Bank (Kode 100)</span>
-     </button>
-     <button onclick="toggleDrawer(false); switchAdminTab('mutasi')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
-      <i class="fa-solid fa-receipt w-5 text-center text-orange-300"></i>
-      <span class="text-xs font-semibold">Mutasi Sistem</span>
-     </button>
-    </nav>
-   </div>
-
-   <div class="p-4 border-t border-slate-800/80">
-    <a href="admin-login.html" class="w-full flex items-center justify-center space-x-2 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-xs font-bold">
-     <i class="fa-solid fa-arrow-left"></i>
-     <span>Keluar Sesi Admin</span>
-    </a>
-   </div>
-  </aside>
-
-  <!-- HEADER ADMIN -->
-  <header class="p-5 pt-6 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900">
-   <div class="flex justify-between items-center mb-4">
-    <div class="flex items-center space-x-3">
-     <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-2xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center text-slate-200 hover:border-orange-500/50 hover:text-orange-400 transition">
-      <i class="fa-solid fa-bars-staggered text-base"></i>
-     </button>
-     <div>
-      <div class="flex items-center space-x-1.5">
-       <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-       <span class="text-[10px] text-orange-400 font-bold uppercase tracking-wider">ADMINISTRATOR SYSTEM</span>
-      </div>
-      <h1 class="text-xs font-bold text-white tracking-tight">BINI Syariah Central</h1>
-     </div>
-    </div>
-    <button onclick="fetchAdminData()" class="w-9 h-9 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-orange-400 transition">
-     <i class="fa-solid fa-arrows-rotate text-xs"></i>
-    </button>
-   </div>
-  </header>
-
-  <!-- KONTEN UTAMA ADMIN -->
-  <main class="px-5 flex-1 space-y-4 py-3">
-   
-   <!-- 1. TAB DASHBOARD (DENGAN KARTU PENGATURAN NOMINAL POTONGAN BULANAN) -->
-   <section id="admin-dashboard" class="space-y-4 hidden">
-    <div class="grid grid-cols-2 gap-3">
-     <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-      <span class="text-[10px] text-slate-400 block">Total Nasabah Aktif</span>
-      <h3 id="statTotalNasabah" class="text-xl font-extrabold text-white mt-1">0</h3>
-     </div>
-     <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-      <span class="text-[10px] text-slate-400 block">Total Simpanan Nasabah</span>
-      <h3 id="statTotalSaldo" class="text-sm font-extrabold text-orange-400 mt-1">Rp 0</h3>
-     </div>
-    </div>
-    <div class="bg-orange-600/10 border border-orange-500/30 p-4 rounded-2xl flex justify-between items-center">
-     <div>
-      <h4 class="text-xs font-bold text-white">Akumulasi Kas Pusat Bank</h4>
-      <p class="text-[10px] text-slate-400 mt-0.5">Pemeliharaan bulanan otomatis (Kode 100)</p>
-     </div>
-     <button onclick="openKasBankModal()" class="px-3 py-2 rounded-xl bg-orange-600 text-white font-bold text-xs hover:bg-orange-500 transition">
-      Cek Kas
-     </button>
-    </div>
-
-    <!-- PENGATURAN NOMINAL POTONGAN BULANAN LANGSUNG DARI ADMIN -->
-    <div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-3">
-     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-      <i class="fa-solid fa-gear text-orange-400"></i> Pengaturan Potongan Bulanan (Kode 100)
-     </h3>
-     <form onsubmit="handleSaveSetting(event)" class="space-y-3">
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1">Nominal Potongan Biaya Per Bulan (Rp)</label>
-       <input type="number" id="settingNominalPotongan" required min="0" placeholder="5000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-extrabold text-orange-400 focus:outline-none focus:border-orange-500">
-      </div>
-      <button type="submit" id="btnSaveSetting" class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition">
-       Simpan Pengaturan Potongan
-      </button>
-     </form>
-    </div>
-   </section>
-
-   <!-- 2. TAB TRANSAKSI UTAMA (DENGAN SCANNER & AUTOCOMPLETE NAMA/ALAMAT) -->
-   <section id="admin-transaksi" class="space-y-4">
-    <div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
-     <h3 class="text-sm font-bold text-white flex items-center gap-2">
-      <i class="fa-solid fa-money-bill-transfer text-emerald-400"></i> Setor / Tarik Tunai Teller (Kode 011)
-     </h3>
-     <form onsubmit="handleAdminTransactionSubmit(event)" class="space-y-3">
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1.5">ID Nasabah atau No. Rekening</label>
-       <div class="flex gap-2">
-        <div class="flex-1 flex items-center bg-slate-900 border border-slate-700 focus-within:border-orange-500 rounded-xl px-3">
-         <input type="text" id="adminTxNasabahInput" oninput="lookupAdminNasabah(this.value)" required placeholder="NSB-001 atau No. Rek" class="w-full bg-transparent py-2.5 text-xs text-white uppercase font-mono focus:outline-none">
-        </div>
-        <button type="button" onclick="openAdminScanner()" class="px-3 py-2.5 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-400 hover:bg-orange-500 hover:text-slate-950 font-bold text-xs transition flex items-center gap-1 shrink-0">
-         <i class="fa-solid fa-qrcode"></i>
-         <span>Scan</span>
-        </button>
-       </div>
-       <!-- KOTAK INFO NAMA & ALAMAT OTOMATIS -->
-       <div id="adminNasabahPreviewBox" class="mt-2 p-3 bg-slate-900/90 border border-slate-800 rounded-xl hidden text-xs space-y-1">
-        <div class="flex justify-between"><span class="text-slate-400">Nama Nasabah:</span><span id="previewNama" class="font-bold text-white">-</span></div>
-        <div class="flex justify-between"><span class="text-slate-400">Alamat:</span><span id="previewAlamat" class="text-orange-300">-</span></div>
-        <div class="flex justify-between"><span class="text-slate-400">Saldo Efektif:</span><span id="previewSaldo" class="font-extrabold text-emerald-400">-</span></div>
-       </div>
-      </div>
-
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1">Jenis Transaksi</label>
-       <select id="adminTxType" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
-        <option value="SETOR">Setor Tunai (+)</option>
-        <option value="TARIK">Tarik Tunai (-)</option>
-       </select>
-      </div>
-
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1">Nominal (Rp)</label>
-       <input type="number" id="adminTxAmount" required min="1000" placeholder="50000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-extrabold text-orange-400 focus:outline-none focus:border-orange-500">
-      </div>
-
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1">Keterangan / Catatan</label>
-       <input type="text" id="adminTxNote" placeholder="Contoh: Setoran tunai di kantor layanan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
-      </div>
-
-      <button type="submit" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30">
-       Proses Transaksi Teller
-      </button>
-     </form>
-    </div>
-   </section>
-
-   <!-- 3. TAB DATA NASABAH (DENGAN TOMBOL TAMBAH NASABAH BARU) -->
-   <section id="admin-nasabah" class="hidden space-y-3">
-    <div class="flex justify-between items-center">
-     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Direktori Rekening Nasabah</h3>
-     <button onclick="openModal('addNasabahModal')" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition flex items-center gap-1.5">
-      <i class="fa-solid fa-user-plus"></i>
-      <span>+ Nasabah Baru</span>
-     </button>
-    </div>
-    <div id="adminNasabahList" class="space-y-2"></div>
-   </section>
-
-   <!-- 4. TAB BROADCAST & PENGUMUMAN (DENGAN LIVE PREVIEW & HINGGA 3 TOMBOL SEJAJAR) -->
-   <section id="admin-broadcast" class="hidden space-y-4">
-    <div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-4">
-     <h3 class="text-sm font-bold text-white flex items-center gap-2">
-      <i class="fa-solid fa-bullhorn text-sky-400"></i> Publikasi Broadcast & Pengumuman
-     </h3>
-     <form onsubmit="handleBroadcastSubmit(event)" class="space-y-3">
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1">Judul Pengumuman</label>
-       <input type="text" id="bcTitle" oninput="updateBroadcastPreview()" required placeholder="Contoh: Pembaruan Sistem Layanan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
-      </div>
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1">Badge / Kategori</label>
-       <input type="text" id="bcBadge" oninput="updateBroadcastPreview()" required placeholder="Contoh: INFORMASI RESMI" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
-      </div>
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1">Isi Pesan / Deskripsi</label>
-       <textarea id="bcDesc" oninput="updateBroadcastPreview()" required rows="3" placeholder="Tulis rincian informasi di sini..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"></textarea>
-      </div>
-      
-      <!-- PENGATURAN TOMBOL 1, 2, 3 BERJEJER -->
-      <div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
-       <span class="text-[11px] font-bold text-orange-400 block"><i class="fa-solid fa-link mr-1"></i> Tombol Interaktif Sejajar (Hingga 3 Tombol)</span>
-       
-       <!-- Tombol 1 -->
-       <div class="grid grid-cols-2 gap-2">
-        <input type="text" id="bcBtn1Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 1" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-        <input type="url" id="bcBtn1Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-       </div>
-       <!-- Tombol 2 -->
-       <div class="grid grid-cols-2 gap-2">
-        <input type="text" id="bcBtn2Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 2 (Opsional)" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-        <input type="url" id="bcBtn2Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-       </div>
-       <!-- Tombol 3 -->
-       <div class="grid grid-cols-2 gap-2">
-        <input type="text" id="bcBtn3Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 3 (Opsional)" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-        <input type="url" id="bcBtn3Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-       </div>
-      </div>
-
-      <div>
-       <label class="block text-xs font-semibold text-slate-300 mb-1">Tema Warna Banner</label>
-       <select id="bcTheme" onchange="updateBroadcastPreview()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
-        <option value="from-orange-950/80 to-slate-900 border-orange-500/40">Tema Orange Elegan</option>
-        <option value="from-emerald-950/80 to-slate-900 border-emerald-500/40">Tema Hijau Syariah</option>
-        <option value="from-sky-950/80 to-slate-900 border-sky-500/40">Tema Biru Informasi</option>
-       </select>
-      </div>
-
-      <!-- KOTAK LIVE PREVIEW -->
-      <div class="space-y-1.5">
-       <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pratinjau Langsung (Live Preview):</span>
-       <div id="broadcastLivePreviewContainer"></div>
-      </div>
-
-      <button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition shadow-lg shadow-sky-600/30">
-       Publikasikan Broadcast
-      </button>
-     </form>
-    </div>
-   </section>
-
-   <!-- 5. TAB MUTASI -->
-   <section id="admin-mutasi" class="hidden space-y-3">
-    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Jurnal Mutasi Transaksi Sistem</h3>
-    <div id="adminMutasiList" class="space-y-2"></div>
-   </section>
-
-  </main>
-
-  <!-- MODAL TAMBAH NASABAH BARU OLEH ADMIN -->
-  <div id="addNasabahModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-   <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 animate-card">
-    <div class="flex justify-between items-center">
-     <h3 class="font-bold text-sm text-white flex items-center gap-2">
-      <i class="fa-solid fa-user-plus text-orange-400"></i> Pendaftaran Rekening Nasabah Baru
-     </h3>
-     <button onclick="closeModal('addNasabahModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-      <i class="fa-solid fa-xmark"></i>
-     </button>
-    </div>
-    <form onsubmit="handleAdminRegisterNasabah(event)" class="space-y-3">
-     <div>
-      <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Lengkap Nasabah</label>
-      <input type="text" id="adminRegName" required placeholder="Nama lengkap sesuai identitas" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
-     </div>
-     <div>
-      <label class="block text-xs font-semibold text-slate-300 mb-1">Alamat Domisili</label>
-      <input type="text" id="adminRegAddress" required placeholder="Alamat lengkap tempat tinggal" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
-     </div>
-     <div>
-      <label class="block text-xs font-semibold text-slate-300 mb-1">No. Telepon / WhatsApp</label>
-      <input type="tel" id="adminRegPhone" required inputmode="numeric" placeholder="081234567890" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-orange-500">
-     </div>
-     <div>
-      <label class="block text-xs font-semibold text-slate-300 mb-1">PIN Transaksi (6 Digit)</label>
-      <input type="password" id="adminRegPin" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white tracking-[0.5em] text-center font-bold focus:outline-none focus:border-orange-500">
-     </div>
-     <button type="submit" id="adminRegSubmitBtn" class="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition shadow-lg shadow-orange-600/30">
-      Simpan & Terbitkan Rekening
-     </button>
-    </form>
-   </div>
-  </div>
-
-  <!-- MODAL SCANNER KAMERA ADMIN -->
-  <div id="adminScannerModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-   <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
-    <div class="flex justify-between items-center">
-     <h3 class="font-bold text-sm text-white">Pindai QR Nasabah</h3>
-     <button onclick="closeAdminScanner()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-      <i class="fa-solid fa-xmark"></i>
-     </button>
-    </div>
-    <div class="relative bg-slate-950 border border-slate-800 rounded-2xl h-72 flex flex-col items-center justify-center overflow-hidden">
-     <div id="readerAdmin" class="w-full h-full"></div>
-    </div>
-    <span class="text-[10px] text-slate-400">Arahkan kamera ke QR Code Kartu Nasabah</span>
-   </div>
-  </div>
-
-  <!-- MODAL CEK KAS BANK -->
-  <div id="kasBankModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-   <div class="bg-slate-900 border border-orange-500/40 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
-    <div class="flex justify-between items-center">
-     <h3 class="font-bold text-sm text-white">Rekening Kas Pusat Bank</h3>
-     <button onclick="closeModal('kasBankModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-      <i class="fa-solid fa-xmark"></i>
-     </button>
-    </div>
-    <div class="nasabah-mesh p-5 rounded-2xl border border-orange-500/30 space-y-2">
-     <span class="text-[10px] font-bold text-orange-300 uppercase tracking-wider">ID: NSB-BANK</span>
-     <h2 id="kasBankBalance" class="text-2xl font-extrabold text-white">Rp 0</h2>
-     <p class="text-[11px] text-slate-300 font-mono">No. Rek: 9999 0000 01</p>
-    </div>
-    <p class="text-[10px] text-slate-400">Menampung akumulasi pemeliharaan biaya administrasi bulanan (Kode 100).</p>
-   </div>
-  </div>
-
-  <!-- BOTTOM NAVIGATION ADMIN -->
-  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 py-2.5 px-6 flex justify-around items-center z-30">
-   <button onclick="switchAdminTab('dashboard')" id="nav-das" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
-    <i class="fa-solid fa-chart-pie text-base"></i>
-    <span class="text-[10px] mt-1 font-semibold">Statistik</span>
-   </button>
-   <button onclick="switchAdminTab('transaksi')" id="nav-tra" class="flex flex-col items-center text-orange-400 transition">
-    <i class="fa-solid fa-money-bill-transfer text-base"></i>
-    <span class="text-[10px] mt-1 font-semibold">Transaksi</span>
-   </button>
-   <button onclick="switchAdminTab('nasabah')" id="nav-nas" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
-    <i class="fa-solid fa-users text-base"></i>
-    <span class="text-[10px] mt-1 font-semibold">Nasabah</span>
-   </button>
-   <button onclick="switchAdminTab('broadcast')" id="nav-bro" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
-    <i class="fa-solid fa-bullhorn text-base"></i>
-    <span class="text-[10px] mt-1 font-semibold">Broadcast</span>
-   </button>
-   <button onclick="switchAdminTab('mutasi')" id="nav-mut" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
-    <i class="fa-solid fa-receipt text-base"></i>
-    <span class="text-[10px] mt-1 font-semibold">Mutasi</span>
-   </button>
-  </nav>
-
- </div>
-
- <style>
-  body { font-family: 'Inter', sans-serif; background-color: #020617; }
-  .nasabah-mesh { background-image: radial-gradient(at 85% 15%, rgba(249, 115, 22, 0.28) 0px, transparent 55%, linear-gradient(135deg, #0f172a 0%, #29150b 50%, #431407 100%); }
-  #readerAdmin { width: 100% !important; height: 100% !important; border: none !important; }
-  #readerAdmin video { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 1rem; }
-  #readerAdmin__dashboard_section_csr { display: none !important; }
- </style>
-
- <script>
-  // Validasi Sesi Admin (Terisolasi)
-  const sessionAdmin = sessionStorage.getItem('nusa_admin_session');
-  if (!sessionAdmin) {
-      window.location.href = 'admin-login.html';
-  }
-
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu0kGhiGxqD1wH5MeqWxIDMfep_SsTLYkpYMnjwzGJNu2kUPAW8T83SL2C1t52CH9r/exec";
-  let adminDataNasabah = [];
-  let adminDataMutasi = [];
-  let kasBankInfo = { balance: 0 };
-  let html5QrCodeAdmin = null;
-  let selectedValidNasabahId = null;
-
-  function toggleDrawer(show) {
-   const drawer = document.getElementById('navDrawer');
-   const backdrop = document.getElementById('drawerBackdrop');
-   if (show) {
-    backdrop.classList.remove('hidden');
-    setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
-    drawer.classList.remove('-translate-x-full');
-   } else {
-    drawer.classList.add('-translate-x-full');
-    backdrop.classList.add('opacity-0');
-    setTimeout(() => backdrop.classList.add('hidden'), 300);
-   }
-  }
-
-  function switchAdminTab(tab) {
-   ['dashboard', 'transaksi', 'nasabah', 'broadcast', 'mutasi'].forEach(t => {
-    const el = document.getElementById('admin-' + t);
-    if (el) el.classList.add('hidden');
-    const navEl = document.getElementById('nav-' + t.slice(0,3));
-    if (navEl) navEl.className = 'flex flex-col items-center text-slate-400 hover:text-orange-400 transition';
-   });
-   const target = document.getElementById('admin-' + tab);
-   if (target) target.classList.remove('hidden');
-   const activeNav = document.getElementById('nav-' + tab.slice(0,3));
-   if (activeNav) activeNav.className = 'flex flex-col items-center text-orange-400 transition';
-  }
-
-  function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-  function openKasBankModal() { openModal('kasBankModal'); }
-
-  function formatRupiah(num) {
-   return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
-  }
-
-  function normalizeCustomerId(rawInput) {
-   let clean = String(rawInput || '').trim().toUpperCase();
-   if (clean.startsWith('NSB-')) clean = clean.replace('NSB-', '');
-   return clean ? 'NSB-' + clean : '';
-  }
-
-  function lookupAdminNasabah(val) {
-   const cleanVal = val.trim().toUpperCase();
-   const previewBox = document.getElementById('adminNasabahPreviewBox');
-   selectedValidNasabahId = null;
-
-   if (!cleanVal) {
-    previewBox.classList.add('hidden');
-    return;
-   }
-
-   let fullId = normalizeCustomerId(cleanVal);
-   const found = adminDataNasabah.find(n => {
-    const dbId = String(n.ID_Nasabah || '').trim().toUpperCase();
-    const dbAcc = String(n.No_Rekening || '').trim().toUpperCase();
-    return dbId === fullId || dbId === cleanVal || dbAcc.includes(cleanVal);
-   });
-
-   if (found) {
-    selectedValidNasabahId = found.ID_Nasabah;
-    document.getElementById('previewNama').textContent = found.Nama;
-    document.getElementById('previewAlamat').textContent = found.Alamat || '-';
-    document.getElementById('previewSaldo').textContent = formatRupiah(found.Saldo);
-    previewBox.classList.remove('hidden');
-   } else {
-    previewBox.classList.add('hidden');
-   }
-  }
-
-  function openAdminScanner() {
-   openModal('adminScannerModal');
-   if (!html5QrCodeAdmin) {
-    html5QrCodeAdmin = new Html5Qrcode("readerAdmin");
-   }
-   html5QrCodeAdmin.start(
-    { facingMode: "environment" }, 
-    { fps: 10, qrbox: { width: 240, height: 240 } },
-    (decodedText) => {
-     let clean = decodedText.trim();
-     if (clean.includes('NSB-')) clean = clean.split('NSB-')[1];
-     document.getElementById('adminTxNasabahInput').value = 'NSB-' + clean;
-     lookupAdminNasabah('NSB-' + clean);
-     closeAdminScanner();
-    },
-    (err) => {}
-   ).catch(err => alert('Gagal membuka kamera.'));
-  }
-
-  function closeAdminScanner() {
-   if (html5QrCodeAdmin && html5QrCodeAdmin.isScanning) {
-    html5QrCodeAdmin.stop().then(() => closeModal('adminScannerModal')).catch(() => closeModal('adminScannerModal'));
-   } else {
-    closeModal('adminScannerModal');
-   }
-  }
-
-  function updateBroadcastPreview() {
-   const title = document.getElementById('bcTitle').value || 'Judul Pengumuman';
-   const badge = document.getElementById('bcBadge').value || 'INFO';
-   const desc = document.getElementById('bcDesc').value || 'Deskripsi isi pesan broadcast akan tampil di sini...';
-   const theme = document.getElementById('bcTheme').value;
-
-   const btn1L = document.getElementById('bcBtn1Label').value;
-   const btn2L = document.getElementById('bcBtn2Label').value;
-   const btn3L = document.getElementById('bcBtn3Label').value;
-
-   let buttonsHTML = '';
-   let activeButtonsCount = 0;
-
-   if (btn1L) activeButtonsCount++;
-   if (btn2L) activeButtonsCount++;
-   if (btn3L) activeButtonsCount++;
-
-   if (activeButtonsCount > 0) {
-    buttonsHTML += `<div class="grid grid-cols-${activeButtonsCount} gap-2 mt-3">`;
-    if (btn1L) buttonsHTML += `<div class="py-2 px-3 rounded-xl bg-orange-600 text-white font-bold text-[10px] text-center truncate">${btn1L}</div>`;
-    if (btn2L) buttonsHTML += `<div class="py-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-[10px] text-center truncate">${btn2L}</div>`;
-    if (btn3L) buttonsHTML += `<div class="py-2 px-3 rounded-xl bg-sky-600 text-white font-bold text-[10px] text-center truncate">${btn3L}</div>`;
-    buttonsHTML += `</div>`;
-   }
-
-   const container = document.getElementById('broadcastLivePreviewContainer');
-   container.innerHTML = `
-    <div class="p-4 bg-gradient-to-br ${theme} border rounded-2xl shadow-lg space-y-2">
-     <div class="flex justify-between items-center">
-      <span class="px-2 py-0.5 rounded bg-black/50 text-[9px] font-extrabold text-orange-300 uppercase border border-orange-400/30">${badge}</span>
-     </div>
-     <div>
-      <h4 class="text-sm font-extrabold text-white leading-tight">${title}</h4>
-      <p class="text-[11px] text-slate-300 mt-1">${desc}</p>
-     </div>
-     ${buttonsHTML}
-    </div>
-   `;
-  }
-
-  async function fetchAdminData() {
-   try {
-    const res = await fetch(`${SCRIPT_URL}?action=getAllData`);
-    const result = await res.json();
-    if (result.status === 'success') {
-     adminDataNasabah = result.nasabah || [];
-     adminDataMutasi = result.mutasi || [];
-     
-     const bankAccount = adminDataNasabah.find(n => String(n.ID_Nasabah) === 'NSB-BANK');
-     if (bankAccount) {
-      kasBankInfo.balance = Number(bankAccount.Saldo || 0);
-      document.getElementById('kasBankBalance').textContent = formatRupiah(kasBankInfo.balance);
-     }
-
-     const wargaList = adminDataNasabah.filter(n => String(n.ID_Nasabah) !== 'NSB-BANK');
-     const totalSaldoWarga = wargaList.reduce((acc, curr) => acc + Number(curr.Saldo || 0), 0);
-
-     document.getElementById('statTotalNasabah').textContent = wargaList.length;
-     document.getElementById('statTotalSaldo').textContent = formatRupiah(totalSaldoWarga);
-
-     renderAdminNasabah(wargaList);
-     renderAdminMutasi(adminDataMutasi);
-     updateBroadcastPreview();
-    }
-   } catch(e) {}
-
-   // Ambil pengaturan nominal potongan
-   try {
-    const setRes = await fetch(`${SCRIPT_URL}?action=getSettings`);
-    const setResult = await setRes.json();
-    if (setResult.status === 'success' && setResult.nominalPotongan) {
-     document.getElementById('settingNominalPotongan').value = setResult.nominalPotongan;
-    }
-   } catch(e) {}
-  }
-
-  async function handleSaveSetting(e) {
-   e.preventDefault();
-   const nominal = document.getElementById('settingNominalPotongan').value;
-   const btn = document.getElementById('btnSaveSetting');
-   btn.disabled = true;
-   btn.textContent = 'Menyimpan...';
-
-   try {
-    const res = await fetch(SCRIPT_URL, {
-     method: 'POST',
-     body: JSON.stringify({ action: 'saveSettings', data: { nominalPotongan: nominal } })
-    });
-    const result = await res.json();
-    if (result.status === 'success') {
-     alert('Pengaturan nominal potongan bulanan berhasil diperbarui!');
-    } else {
-     alert('Gagal menyimpan pengaturan.');
-    }
-   } catch(e) {
-    alert('Kesalahan jaringan.');
-   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Simpan Pengaturan Potongan';
-   }
-  }
-
-  async function handleAdminTransactionSubmit(e) {
-   e.preventDefault();
-   if (!selectedValidNasabahId) {
-    alert('Pilih atau ketik ID/No. Rekening Nasabah yang valid terlebih dahulu!');
-    return;
-   }
-
-   const jenis = document.getElementById('adminTxType').value;
-   const nominal = Number(document.getElementById('adminTxAmount').value);
-   const keterangan = document.getElementById('adminTxNote').value.trim() || (jenis === 'SETOR' ? 'Setor Tunai Teller' : 'Tarik Tunai Teller');
-
-   const now = new Date();
-   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-   const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-   const refCode = 'ADM-' + Date.now().toString().slice(-8);
-
-   const payload = {
-    action: 'adminTransaction',
-    data: { nasabahId: selectedValidNasabahId, jenis: jenis === 'SETOR' ? 'SETOR-011' : 'TARIK-011', nominal, refCode, dateStr, keterangan, timestamp: Math.floor(Date.now() / 1000) }
-   };
-
-   try {
-    const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-    const result = await res.json();
-    if (result.status === 'success') {
-     alert('Transaksi teller berhasil diproses!');
-     e.target.reset();
-     document.getElementById('adminNasabahPreviewBox').classList.add('hidden');
-     selectedValidNasabahId = null;
-     fetchAdminData();
-    } else {
-     alert(result.message || 'Transaksi gagal.');
-    }
-   } catch(err) {
-    alert('Terjadi kesalahan jaringan.');
-   }
-  }
-
-  async function handleAdminRegisterNasabah(e) {
-   e.preventDefault();
-   const name = document.getElementById('adminRegName').value.trim();
-   const address = document.getElementById('adminRegAddress').value.trim();
-   const phone = document.getElementById('adminRegPhone').value.trim();
-   const pin = document.getElementById('adminRegPin').value.trim();
-   const btn = document.getElementById('adminRegSubmitBtn');
-
-   btn.disabled = true;
-   btn.textContent = 'Membuat Rekening...';
-
-   try {
-    const wargaList = adminDataNasabah.filter(n => String(n.ID_Nasabah).startsWith('NSB-'));
-    const newId = 'NSB-' + String(wargaList.length + 1).padStart(3, '0');
-    const newAcc = '8801 ' + Math.floor(1000 + Math.random() * 9000) + ' ' + Math.floor(10 + Math.random() * 90);
-
-    const now = new Date();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-
-    const payloadData = {
-     id: newId, name, address, phone, pin, acc: newAcc, balance: 0,
-     dateStr, month: String(now.getMonth() + 1).padStart(2, '0'),
-     year: String(now.getFullYear()), timestamp: Math.floor(Date.now() / 1000), refCode: 'REG-' + Date.now().toString().slice(-8)
-    };
-
-    const res = await fetch(SCRIPT_URL, {
-     method: 'POST',
-     body: JSON.stringify({ action: 'registerNasabah', data: payloadData })
-    });
-    const result = await res.json();
-
-    if (result.status === 'success') {
-     alert(`Berhasil mendaftarkan nasabah baru!\nID: ${newId}\nNo. Rek: ${newAcc}`);
-     closeModal('addNasabahModal');
-     e.target.reset();
-     fetchAdminData();
-    } else {
-     alert(result.message || 'Gagal mendaftarkan nasabah.');
-    }
-   } catch (err) {
-    alert('Terjadi kesalahan jaringan.');
-   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Simpan & Terbitkan Rekening';
-   }
-  }
-
-  async function handleBroadcastSubmit(e) {
-   e.preventDefault();
-   const title = document.getElementById('bcTitle').value.trim();
-   const badge = document.getElementById('bcBadge').value.trim();
-   const desc = document.getElementById('bcDesc').value.trim();
-   const theme = document.getElementById('bcTheme').value;
-
-   const btn1L = document.getElementById('bcBtn1Label').value.trim();
-   const btn1U = document.getElementById('bcBtn1Url').value.trim();
-   const btn2L = document.getElementById('bcBtn2Label').value.trim();
-   const btn2U = document.getElementById('bcBtn2Url').value.trim();
-   const btn3L = document.getElementById('bcBtn3Label').value.trim();
-   const btn3U = document.getElementById('bcBtn3Url').value.trim();
-
-   const payload = {
-    action: 'saveBroadcast',
-    data: {
-     id: 'BC-' + Date.now().toString().slice(-6),
-     badge, title, desc, theme,
-     btn1Label: btn1L, btn1Url: btn1U,
-     btn2Label: btn2L, btn2Url: btn2U,
-     btn3Label: btn3L, btn3Url: btn3U
-    }
-   };
-
-   try {
-    const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-    const result = await res.json();
-    if (result.status === 'success') {
-     alert('Broadcast iklan dengan multi-tombol berhasil dipublikasikan!');
-     e.target.reset();
-     updateBroadcastPreview();
-    } else {
-     alert('Gagal mempublikasikan broadcast.');
-    }
-   } catch(e) {
-    alert('Gagal terhubung ke server.');
-   }
-  }
-
-  function renderAdminNasabah(list) {
-   const container = document.getElementById('adminNasabahList');
-   if(!container) return;
-   container.innerHTML = '';
-   list.forEach(n => {
-    const div = document.createElement('div');
-    div.className = 'p-3.5 bg-slate-950 border border-slate-800 rounded-2xl flex justify-between items-center text-xs';
-    div.innerHTML = `
-     <div>
-      <h4 class="font-bold text-white">${n.Nama}</h4>
-      <p class="text-[10px] text-orange-400 font-mono">${n.ID_Nasabah} • ${n.No_Rekening}</p>
-     </div>
-     <div class="text-right">
-      <span class="font-extrabold text-orange-400 block">${formatRupiah(n.Saldo)}</span>
-     </div>
-    `;
-    container.appendChild(div);
-   });
-  }
-
-  function renderAdminMutasi(list) {
-   const container = document.getElementById('adminMutasiList');
-   if(!container) return;
-   container.innerHTML = '';
-   list.forEach(tx => {
-    const div = document.createElement('div');
-    div.className = 'p-3 bg-slate-950 border border-slate-800 rounded-2xl flex justify-between items-center text-xs';
-    div.innerHTML = `
-     <div>
-      <h4 class="font-bold text-white">${tx.Keterangan || tx.Jenis}</h4>
-      <p class="text-[10px] text-slate-400">${tx.Nama_Nasabah} (${tx.ID_Nasabah}) • ${tx.Tanggal}</p>
-     </div>
-     <span class="font-mono font-bold text-orange-400">${formatRupiah(tx.Nominal)}</span>
-    `;
-    container.appendChild(div);
-   });
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-   fetchAdminData();
-   switchAdminTab('transaksi');
-  });
- </script>
+​<body class="bg-slate-950 text-slate-100 antialiased selection:bg-orange-500 selection:text-white">
+
+<div class="max-w-md mx-auto min-h-screen bg-slate-900 shadow-2xl shadow-black/80 flex flex-col justify-between relative overflow-x-hidden border-x border-slate-800/80 pb-20">
+
+​<div id="drawerBackdrop" onclick="toggleDrawer(false)" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-40 hidden transition-opacity duration-300 opacity-0"></div>
+
+​<!-- HAMBURGER MENU DRAWER ADMIN -->
+
+<aside id="navDrawer" class="fixed top-0 left-0 bottom-0 w-72 max-w-[82vw] bg-slate-950 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between">
+
+<div>
+
+<div class="p-6 bg-gradient-to-br from-slate-900 to-orange-950/60 border-b border-slate-800">
+
+<div class="flex items-center justify-between mb-4">
+
+<div class="flex items-center space-x-2.5">
+
+<div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-extrabold text-base tracking-tighter shadow-lg shadow-orange-500/30 border border-orange-400/40">
+
+69
+
+</div>
+
+<div>
+
+<span class="font-extrabold tracking-tight text-sm text-white block leading-tight">BINI <span class="text-orange-400">Syariah</span></span>
+
+<span class="text-[9px] text-orange-300 font-semibold tracking-wider block uppercase">Suami Cari, Istri Menikmati</span>
+
+</div>
+
+</div>
+
+<button onclick="toggleDrawer(false)" class="w-8 h-8 rounded-full bg-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center transition">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+</div>
+
+</div>
+
+​<nav class="p-4 space-y-1.5">
+
+<button onclick="toggleDrawer(false); switchAdminTab('dashboard')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+
+<i class="fa-solid fa-chart-pie w-5 text-center text-orange-400"></i>
+
+<span class="text-xs font-semibold">Dashboard & Statistik</span>
+
+</button>
+
+<button onclick="toggleDrawer(false); switchAdminTab('transaksi')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+
+<i class="fa-solid fa-money-bill-transfer w-5 text-center text-emerald-400"></i>
+
+<span class="text-xs font-semibold">Input Transaksi (011)</span>
+
+</button>
+
+<button onclick="toggleDrawer(false); switchAdminTab('nasabah')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+
+<i class="fa-solid fa-users w-5 text-center text-amber-400"></i>
+
+<span class="text-xs font-semibold">Data Nasabah</span>
+
+</button>
+
+<button onclick="toggleDrawer(false); switchAdminTab('broadcast')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+
+<i class="fa-solid fa-bullhorn w-5 text-center text-sky-400"></i>
+
+<span class="text-xs font-semibold">Broadcast & Pengumuman</span>
+
+</button>
+
+<button onclick="toggleDrawer(false); openKasBankModal()" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-orange-400 hover:bg-orange-500 hover:text-white transition text-left">
+
+<i class="fa-solid fa-vault w-5 text-center text-orange-400"></i>
+
+<span class="text-xs font-bold">Kas Pusat Bank (Kode 100)</span>
+
+</button>
+
+<button onclick="toggleDrawer(false); switchAdminTab('mutasi')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+
+<i class="fa-solid fa-receipt w-5 text-center text-orange-300"></i>
+
+<span class="text-xs font-semibold">Mutasi Sistem</span>
+
+</button>
+
+</nav>
+
+</div>
+
+​<div class="p-4 border-t border-slate-800/80">
+
+<button onclick="handleAdminLogout()" class="w-full flex items-center justify-center space-x-2 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-xs font-bold">
+
+<i class="fa-solid fa-arrow-left"></i>
+
+<span>Keluar Sesi Admin</span>
+
+</button>
+
+</div>
+
+</aside>
+
+​<!-- HEADER ADMIN -->
+
+<header class="p-5 pt-6 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900">
+
+<div class="flex justify-between items-center mb-4">
+
+<div class="flex items-center space-x-3">
+
+<button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-2xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center text-slate-200 hover:border-orange-500/50 hover:text-orange-400 transition">
+
+<i class="fa-solid fa-bars-staggered text-base"></i>
+
+</button>
+
+<div>
+
+<div class="flex items-center space-x-1.5">
+
+<span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+
+<span class="text-[10px] text-orange-400 font-bold uppercase tracking-wider">ADMINISTRATOR SYSTEM</span>
+
+</div>
+
+<h1 class="text-xs font-bold text-white tracking-tight">BINI Syariah Central</h1>
+
+</div>
+
+</div>
+
+<button onclick="fetchAdminData()" class="w-9 h-9 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-orange-400 transition">
+
+<i class="fa-solid fa-arrows-rotate text-xs"></i>
+
+</button>
+
+</div>
+
+</header>
+
+​<!-- KONTEN UTAMA ADMIN -->
+
+<main class="px-5 flex-1 space-y-4 py-3">
+
+​<!-- 1. TAB DASHBOARD -->
+
+<section id="admin-dashboard" class="space-y-4 hidden">
+
+<div class="grid grid-cols-2 gap-3">
+
+<div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+
+<span class="text-[10px] text-slate-400 block">Total Nasabah Aktif</span>
+
+<h3 id="statTotalNasabah" class="text-xl font-extrabold text-white mt-1">0</h3>
+
+</div>
+
+<div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+
+<span class="text-[10px] text-slate-400 block">Total Simpanan Nasabah</span>
+
+<h3 id="statTotalSaldo" class="text-sm font-extrabold text-orange-400 mt-1">Rp 0</h3>
+
+</div>
+
+</div>
+
+<div class="bg-orange-600/10 border border-orange-500/30 p-4 rounded-2xl flex justify-between items-center">
+
+<div>
+
+<h4 class="text-xs font-bold text-white">Akumulasi Kas Pusat Bank</h4>
+
+<p class="text-[10px] text-slate-400 mt-0.5">Pemeliharaan bulanan otomatis (Kode 100)</p>
+
+</div>
+
+<button onclick="openKasBankModal()" class="px-3 py-2 rounded-xl bg-orange-600 text-white font-bold text-xs hover:bg-orange-500 transition">
+
+Cek Kas
+
+</button>
+
+</div>
+
+​<!-- PENGATURAN NOMINAL POTONGAN BULANAN -->
+
+<div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-3">
+
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+
+<i class="fa-solid fa-gear text-orange-400"></i> Pengaturan Potongan Bulanan (Kode 100)
+
+</h3>
+
+<form onsubmit="handleSaveSetting(event)" class="space-y-3">
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Nominal Potongan Biaya Per Bulan (Rp)</label>
+
+<input type="number" id="settingNominalPotongan" required min="0" placeholder="5000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-extrabold text-orange-400 focus:outline-none focus:border-orange-500">
+
+</div>
+
+<button type="submit" id="btnSaveSetting" class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition">
+
+Simpan Pengaturan Potongan
+
+</button>
+
+</form>
+
+</div>
+
+</section>
+
+​<!-- 2. TAB TRANSAKSI UTAMA -->
+
+<section id="admin-transaksi" class="space-y-4">
+
+<div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+
+<h3 class="text-sm font-bold text-white flex items-center gap-2">
+
+<i class="fa-solid fa-money-bill-transfer text-emerald-400"></i> Setor / Tarik Tunai Teller (Kode 011)
+
+</h3>
+
+<form onsubmit="handleAdminTransactionSubmit(event)" class="space-y-3">
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1.5">ID Nasabah atau No. Rekening</label>
+
+<div class="flex gap-2">
+
+<div class="flex-1 flex items-center bg-slate-900 border border-slate-700 focus-within:border-orange-500 rounded-xl px-3">
+
+<input type="text" id="adminTxNasabahInput" oninput="lookupAdminNasabah(this.value)" required placeholder="NSB-001 atau No. Rek" class="w-full bg-transparent py-2.5 text-xs text-white uppercase font-mono focus:outline-none">
+
+</div>
+
+<button type="button" onclick="openAdminScanner()" class="px-3 py-2.5 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-400 hover:bg-orange-500 hover:text-slate-950 font-bold text-xs transition flex items-center gap-1 shrink-0">
+
+<i class="fa-solid fa-qrcode"></i>
+
+<span>Scan</span>
+
+</button>
+
+</div>
+
+<div id="adminNasabahPreviewBox" class="mt-2 p-3 bg-slate-900/90 border border-slate-800 rounded-xl hidden text-xs space-y-1">
+
+<div class="flex justify-between"><span class="text-slate-400">Nama Nasabah:</span><span id="previewNama" class="font-bold text-white">-</span></div>
+
+<div class="flex justify-between"><span class="text-slate-400">Alamat:</span><span id="previewAlamat" class="text-orange-300">-</span></div>
+
+<div class="flex justify-between"><span class="text-slate-400">Saldo Efektif:</span><span id="previewSaldo" class="font-extrabold text-emerald-400">-</span></div>
+
+</div>
+
+</div>
+
+​<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Jenis Transaksi</label>
+
+<select id="adminTxType" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+
+<option value="SETOR">Setor Tunai (+)</option>
+
+<option value="TARIK">Tarik Tunai (-)</option>
+
+</select>
+
+</div>
+
+​<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Nominal (Rp)</label>
+
+<input type="number" id="adminTxAmount" required min="1000" placeholder="50000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-extrabold text-orange-400 focus:outline-none focus:border-orange-500">
+
+</div>
+
+​<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Keterangan / Catatan</label>
+
+<input type="text" id="adminTxNote" placeholder="Contoh: Setoran tunai di kantor layanan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+
+</div>
+
+​<button type="submit" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30">
+
+Proses Transaksi Teller
+
+</button>
+
+</form>
+
+</div>
+
+</section>
+
+​<!-- 3. TAB DATA NASABAH -->
+
+<section id="admin-nasabah" class="hidden space-y-3">
+
+<div class="flex justify-between items-center">
+
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Direktori Rekening Nasabah</h3>
+
+<button onclick="openModal('addNasabahModal')" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition flex items-center gap-1.5">
+
+<i class="fa-solid fa-user-plus"></i>
+
+<span>+ Nasabah Baru</span>
+
+</button>
+
+</div>
+
+<div id="adminNasabahList" class="space-y-2"></div>
+
+</section>
+
+​<!-- 4. TAB BROADCAST -->
+
+<section id="admin-broadcast" class="hidden space-y-4">
+
+<div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-4">
+
+<h3 class="text-sm font-bold text-white flex items-center gap-2">
+
+<i class="fa-solid fa-bullhorn text-sky-400"></i> Publikasi Broadcast & Pengumuman
+
+</h3>
+
+<form onsubmit="handleBroadcastSubmit(event)" class="space-y-3">
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Judul Pengumuman</label>
+
+<input type="text" id="bcTitle" oninput="updateBroadcastPreview()" required placeholder="Contoh: Pembaruan Sistem Layanan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+
+</div>
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Badge / Kategori</label>
+
+<input type="text" id="bcBadge" oninput="updateBroadcastPreview()" required placeholder="Contoh: INFORMASI RESMI" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+
+</div>
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Isi Pesan / Deskripsi</label>
+
+<textarea id="bcDesc" oninput="updateBroadcastPreview()" required rows="3" placeholder="Tulis rincian informasi di sini..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"></textarea>
+
+</div>
+
+​<div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
+
+<span class="text-[11px] font-bold text-orange-400 block"><i class="fa-solid fa-link mr-1"></i> Tombol Interaktif Sejajar (Hingga 3 Tombol)</span>
+
+<div class="grid grid-cols-2 gap-2">
+
+<input type="text" id="bcBtn1Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 1" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+
+<input type="url" id="bcBtn1Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+
+</div>
+
+<div class="grid grid-cols-2 gap-2">
+
+<input type="text" id="bcBtn2Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 2 (Opsional)" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+
+<input type="url" id="bcBtn2Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+
+</div>
+
+<div class="grid grid-cols-2 gap-2">
+
+<input type="text" id="bcBtn3Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 3 (Opsional)" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+
+<input type="url" id="bcBtn3Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+
+</div>
+
+</div>
+
+​<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Tema Warna Banner</label>
+
+<select id="bcTheme" onchange="updateBroadcastPreview()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+
+<option value="from-orange-950/80 to-slate-900 border-orange-500/40">Tema Orange Elegan</option>
+
+<option value="from-emerald-950/80 to-slate-900 border-emerald-500/40">Tema Hijau Syariah</option>
+
+<option value="from-sky-950/80 to-slate-900 border-sky-500/40">Tema Biru Informasi</option>
+
+</select>
+
+</div>
+
+​<div class="space-y-1.5">
+
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pratinjau Langsung (Live Preview):</span>
+
+<div id="broadcastLivePreviewContainer"></div>
+
+</div>
+
+​<button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition shadow-lg shadow-sky-600/30">
+
+Publikasikan Broadcast
+
+</button>
+
+</form>
+
+</div>
+
+</section>
+
+​<!-- 5. TAB MUTASI -->
+
+<section id="admin-mutasi" class="hidden space-y-3">
+
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Jurnal Mutasi Transaksi Sistem</h3>
+
+<div id="adminMutasiList" class="space-y-2"></div>
+
+</section>
+
+​</main>
+
+​<!-- MODAL TAMBAH NASABAH -->
+
+<div id="addNasabahModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+
+<div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 animate-card">
+
+<div class="flex justify-between items-center">
+
+<h3 class="font-bold text-sm text-white flex items-center gap-2">
+
+<i class="fa-solid fa-user-plus text-orange-400"></i> Pendaftaran Rekening Nasabah Baru
+
+</h3>
+
+<button onclick="closeModal('addNasabahModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+</div>
+
+<form onsubmit="handleAdminRegisterNasabah(event)" class="space-y-3">
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Nama Lengkap Nasabah</label>
+
+<input type="text" id="adminRegName" required placeholder="Nama lengkap sesuai identitas" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+
+</div>
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">Alamat Domisili</label>
+
+<input type="text" id="adminRegAddress" required placeholder="Alamat lengkap tempat tinggal" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+
+</div>
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">No. Telepon / WhatsApp</label>
+
+<input type="tel" id="adminRegPhone" required inputmode="numeric" placeholder="081234567890" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-orange-500">
+
+</div>
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-300 mb-1">PIN Transaksi (6 Digit)</label>
+
+<input type="password" id="adminRegPin" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white tracking-[0.5em] text-center font-bold focus:outline-none focus:border-orange-500">
+
+</div>
+
+<button type="submit" id="adminRegSubmitBtn" class="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition shadow-lg shadow-orange-600/30">
+
+Simpan & Terbitkan Rekening
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+​<!-- MODAL SCANNER KAMERA ADMIN -->
+
+<div id="adminScannerModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+
+<div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+
+<div class="flex justify-between items-center">
+
+<h3 class="font-bold text-sm text-white">Pindai QR Nasabah</h3>
+
+<button onclick="closeAdminScanner()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+</div>
+
+<div class="relative bg-slate-950 border border-slate-800 rounded-2xl h-72 flex flex-col items-center justify-center overflow-hidden">
+
+<div id="readerAdmin" class="w-full h-full"></div>
+
+</div>
+
+<span class="text-[10px] text-slate-400">Arahkan kamera ke QR Code Kartu Nasabah</span>
+
+</div>
+
+</div>
+
+​<!-- MODAL CEK KAS BANK -->
+
+<div id="kasBankModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+
+<div class="bg-slate-900 border border-orange-500/40 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+
+<div class="flex justify-between items-center">
+
+<h3 class="font-bold text-sm text-white">Rekening Kas Pusat Bank</h3>
+
+<button onclick="closeModal('kasBankModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+</div>
+
+<div class="nasabah-mesh p-5 rounded-2xl border border-orange-500/30 space-y-2">
+
+<span class="text-[10px] font-bold text-orange-300 uppercase tracking-wider">ID: NSB-BANK</span>
+
+<h2 id="kasBankBalance" class="text-2xl font-extrabold text-white">Rp 0</h2>
+
+<p class="text-[11px] text-slate-300 font-mono">No. Rek: 9999 0000 01</p>
+
+</div>
+
+<p class="text-[10px] text-slate-400">Menampung akumulasi pemeliharaan biaya administrasi bulanan (Kode 100).</p>
+
+</div>
+
+</div>
+
+​<!-- BOTTOM NAVIGATION ADMIN -->
+
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 py-2.5 px-6 flex justify-around items-center z-30">
+
+<button onclick="switchAdminTab('dashboard')" id="nav-das" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
+
+<i class="fa-solid fa-chart-pie text-base"></i>
+
+<span class="text-[10px] mt-1 font-semibold">Statistik</span>
+
+</button>
+
+<button onclick="switchAdminTab('transaksi')" id="nav-tra" class="flex flex-col items-center text-orange-400 transition">
+
+<i class="fa-solid fa-money-bill-transfer text-base"></i>
+
+<span class="text-[10px] mt-1 font-semibold">Transaksi</span>
+
+</button>
+
+<button onclick="switchAdminTab('nasabah')" id="nav-nas" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
+
+<i class="fa-solid fa-users text-base"></i>
+
+<span class="text-[10px] mt-1 font-semibold">Nasabah</span>
+
+</button>
+
+<button onclick="switchAdminTab('broadcast')" id="nav-bro" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
+
+<i class="fa-solid fa-bullhorn text-base"></i>
+
+<span class="text-[10px] mt-1 font-semibold">Broadcast</span>
+
+</button>
+
+<button onclick="switchAdminTab('mutasi')" id="nav-mut" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
+
+<i class="fa-solid fa-receipt text-base"></i>
+
+<span class="text-[10px] mt-1 font-semibold">Mutasi</span>
+
+</button>
+
+</nav>
+
+​</div>
+
+​<style>
+
+body { font-family: 'Inter', sans-serif; background-color: #020617; }
+
+.nasabah-mesh { background-image: radial-gradient(at 85% 15%, rgba(249, 115, 22, 0.28) 0px, transparent 55%, linear-gradient(135deg, #0f172a 0%, #29150b 50%, #431407 100%); }
+
+#readerAdmin { width: 100% !important; height: 100% !important; border: none !important; }
+
+#readerAdmin video { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 1rem; }
+
+#readerAdmin__dashboard_section_csr { display: none !important; }
+
+</style>
+
+​<script>
+
+if ('serviceWorker' in navigator) {
+
+window.addEventListener('load', () => {
+
+navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+});
+
+}
+
+</script>
+
+​<script>
+
+// Validasi Sesi Admin Terisolasi
+
+const sessionAdmin = sessionStorage.getItem('nusa_admin_session');
+
+if (!sessionAdmin) {
+
+window.location.href = 'admin-login.html';
+
+}
+
+​const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu0kGhiGxqD1wH5MeqWxIDMfep_SsTLYkpYMnjwzGJNu2kUPAW8T83SL2C1t52CH9r/exec";
+
+let adminDataNasabah = [];
+
+let adminDataMutasi = [];
+
+let kasBankInfo = { balance: 0 };
+
+let html5QrCodeAdmin = null;
+
+let selectedValidNasabahId = null;
+
+​function toggleDrawer(show) {
+
+const drawer = document.getElementById('navDrawer');
+
+const backdrop = document.getElementById('drawerBackdrop');
+
+if (show) {
+
+backdrop.classList.remove('hidden');
+
+setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+
+drawer.classList.remove('-translate-x-full');
+
+} else {
+
+drawer.classList.add('-translate-x-full');
+
+backdrop.classList.add('opacity-0');
+
+setTimeout(() => backdrop.classList.add('hidden'), 300);
+
+}
+
+}
+
+​function handleAdminLogout() {
+
+sessionStorage.removeItem('nusa_admin_session');
+
+window.location.href = 'admin-login.html';
+
+}
+
+​function switchAdminTab(tab) {
+
+['dashboard', 'transaksi', 'nasabah', 'broadcast', 'mutasi'].forEach(t => {
+
+const el = document.getElementById('admin-' + t);
+
+if (el) el.classList.add('hidden');
+
+const navEl = document.getElementById('nav-' + t.slice(0,3));
+
+if (navEl) navEl.className = 'flex flex-col items-center text-slate-400 hover:text-orange-400 transition';
+
+});
+
+const target = document.getElementById('admin-' + tab);
+
+if (target) target.classList.remove('hidden');
+
+const activeNav = document.getElementById('nav-' + tab.slice(0,3));
+
+if (activeNav) activeNav.className = 'flex flex-col items-center text-orange-400 transition';
+
+}
+
+​function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function openKasBankModal() { openModal('kasBankModal'); }
+
+​function formatRupiah(num) {
+
+return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+
+}
+
+​function normalizeCustomerId(rawInput) {
+
+let clean = String(rawInput || '').trim().toUpperCase();
+
+if (clean.startsWith('NSB-')) clean = clean.replace('NSB-', '');
+
+return clean ? 'NSB-' + clean : '';
+
+}
+
+​function lookupAdminNasabah(val) {
+
+const cleanVal = val.trim().toUpperCase();
+
+const previewBox = document.getElementById('adminNasabahPreviewBox');
+
+selectedValidNasabahId = null;
+
+​if (!cleanVal) {
+
+previewBox.classList.add('hidden');
+
+return;
+
+}
+
+​let fullId = normalizeCustomerId(cleanVal);
+
+const found = adminDataNasabah.find(n => {
+
+const dbId = String(n.ID_Nasabah || '').trim().toUpperCase();
+
+const dbAcc = String(n.No_Rekening || '').trim().toUpperCase();
+
+return dbId === fullId || dbId === cleanVal || dbAcc.includes(cleanVal);
+
+});
+
+​if (found) {
+
+selectedValidNasabahId = found.ID_Nasabah;
+
+document.getElementById('previewNama').textContent = found.Nama;
+
+document.getElementById('previewAlamat').textContent = found.Alamat || '-';
+
+document.getElementById('previewSaldo').textContent = formatRupiah(found.Saldo);
+
+previewBox.classList.remove('hidden');
+
+} else {
+
+previewBox.classList.add('hidden');
+
+}
+
+}
+
+​function openAdminScanner() {
+
+openModal('adminScannerModal');
+
+if (!html5QrCodeAdmin) {
+
+html5QrCodeAdmin = new Html5Qrcode("readerAdmin");
+
+}
+
+html5QrCodeAdmin.start(
+
+{ facingMode: "environment" },
+
+{ fps: 10, qrbox: { width: 240, height: 240 } },
+
+(decodedText) => {
+
+let clean = decodedText.trim();
+
+if (clean.includes('NSB-')) clean = clean.split('NSB-')[1];
+
+document.getElementById('adminTxNasabahInput').value = 'NSB-' + clean;
+
+lookupAdminNasabah('NSB-' + clean);
+
+closeAdminScanner();
+
+},
+
+(err) => {}
+
+).catch(err => alert('Gagal membuka kamera.'));
+
+}
+
+​function closeAdminScanner() {
+
+if (html5QrCodeAdmin && html5QrCodeAdmin.isScanning) {
+
+html5QrCodeAdmin.stop().then(() => closeModal('adminScannerModal')).catch(() => closeModal('adminScannerModal'));
+
+} else {
+
+closeModal('adminScannerModal');
+
+}
+
+}
+
+​function updateBroadcastPreview() {
+
+const title = document.getElementById('bcTitle').value || 'Judul Pengumuman';
+
+const badge = document.getElementById('bcBadge').value || 'INFO';
+
+const desc = document.getElementById('bcDesc').value || 'Deskripsi isi pesan broadcast akan tampil di sini...';
+
+const theme = document.getElementById('bcTheme').value;
+
+​const btn1L = document.getElementById('bcBtn1Label').value;
+
+const btn2L = document.getElementById('bcBtn2Label').value;
+
+const btn3L = document.getElementById('bcBtn3Label').value;
+
+​let buttonsHTML = '';
+
+let activeButtonsCount = 0;
+
+​if (btn1L) activeButtonsCount++;
+
+if (btn2L) activeButtonsCount++;
+
+if (btn3L) activeButtonsCount++;
+
+​if (activeButtonsCount > 0) {
+
+buttonsHTML += <div class="grid grid-cols-${activeButtonsCount} gap-2 mt-3">;
+
+if (btn1L) buttonsHTML += <div class="py-2 px-3 rounded-xl bg-orange-600 text-white font-bold text-[10px] text-center truncate">${btn1L}</div>;
+
+if (btn2L) buttonsHTML += <div class="py-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-[10px] text-center truncate">${btn2L}</div>;
+
+if (btn3L) buttonsHTML += <div class="py-2 px-3 rounded-xl bg-sky-600 text-white font-bold text-[10px] text-center truncate">${btn3L}</div>;
+
+buttonsHTML += </div>;
+
+}
+
+​const container = document.getElementById('broadcastLivePreviewContainer');
+
+container.innerHTML = <div class="p-4 bg-gradient-to-br ${theme} border rounded-2xl shadow-lg space-y-2"> <div class="flex justify-between items-center"> <span class="px-2 py-0.5 rounded bg-black/50 text-[9px] font-extrabold text-orange-300 uppercase border border-orange-400/30">${badge}</span> </div> <div> <h4 class="text-sm font-extrabold text-white leading-tight">${title}</h4> <p class="text-[11px] text-slate-300 mt-1">${desc}</p> </div> ${buttonsHTML} </div>;
+
+}
+
+​async function fetchAdminData() {
+
+try {
+
+const res = await fetch(${SCRIPT_URL}?action=getAllData);
+
+const result = await res.json();
+
+if (result.status === 'success') {
+
+adminDataNasabah = result.nasabah || [];
+
+adminDataMutasi = result.mutasi || [];
+
+​const bankAccount = adminDataNasabah.find(n => String(n.ID_Nasabah) === 'NSB-BANK');
+
+if (bankAccount) {
+
+kasBankInfo.balance = Number(bankAccount.Saldo || 0);
+
+document.getElementById('kasBankBalance').textContent = formatRupiah(kasBankInfo.balance);
+
+}
+
+​const wargaList = adminDataNasabah.filter(n => String(n.ID_Nasabah) !== 'NSB-BANK');
+
+const totalSaldoWarga = wargaList.reduce((acc, curr) => acc + Number(curr.Saldo || 0), 0);
+
+​document.getElementById('statTotalNasabah').textContent = wargaList.length;
+
+document.getElementById('statTotalSaldo').textContent = formatRupiah(totalSaldoWarga);
+
+​renderAdminNasabah(wargaList);
+
+renderAdminMutasi(adminDataMutasi);
+
+updateBroadcastPreview();
+
+}
+
+} catch(e) {}
+
+​try {
+
+const setRes = await fetch(${SCRIPT_URL}?action=getSettings);
+
+const setResult = await setRes.json();
+
+if (setResult.status === 'success' && setResult.nominalPotongan) {
+
+document.getElementById('settingNominalPotongan').value = setResult.nominalPotongan;
+
+}
+
+} catch(e) {}
+
+}
+
+​async function handleSaveSetting(e) {
+
+e.preventDefault();
+
+const nominal = document.getElementById('settingNominalPotongan').value;
+
+const btn = document.getElementById('btnSaveSetting');
+
+btn.disabled = true;
+
+btn.textContent = 'Menyimpan...';
+
+​try {
+
+const res = await fetch(SCRIPT_URL, {
+
+method: 'POST',
+
+body: JSON.stringify({ action: 'saveSettings', data: { nominalPotongan: nominal } })
+
+});
+
+const result = await res.json();
+
+if (result.status === 'success') {
+
+alert('Pengaturan nominal potongan bulanan berhasil diperbarui!');
+
+} else {
+
+alert('Gagal menyimpan pengaturan.');
+
+}
+
+} catch(e) {
+
+alert('Kesalahan jaringan.');
+
+} finally {
+
+btn.disabled = false;
+
+btn.textContent = 'Simpan Pengaturan Potongan';
+
+}
+
+}
+
+​async function handleAdminTransactionSubmit(e) {
+
+e.preventDefault();
+
+if (!selectedValidNasabahId) {
+
+alert('Pilih atau ketik ID/No. Rekening Nasabah yang valid terlebih dahulu!');
+
+return;
+
+}
+
+​const jenis = document.getElementById('adminTxType').value;
+
+const nominal = Number(document.getElementById('adminTxAmount').value);
+
+const keterangan = document.getElementById('adminTxNote').value.trim() || (jenis === 'SETOR' ? 'Setor Tunai Teller' : 'Tarik Tunai Teller');
+
+​const now = new Date();
+
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+const dateStr = ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()};
+
+const refCode = 'ADM-' + Date.now().toString().slice(-8);
+
+​const payload = {
+
+action: 'adminTransaction',
+
+data: { nasabahId: selectedValidNasabahId, jenis: jenis === 'SETOR' ? 'SETOR-011' : 'TARIK-011', nominal, refCode, dateStr, keterangan, timestamp: Math.floor(Date.now() / 1000) }
+
+};
+
+​try {
+
+const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+
+const result = await res.json();
+
+if (result.status === 'success') {
+
+alert('Transaksi teller berhasil diproses dan notifikasi terkirim ke nasabah!');
+
+e.target.reset();
+
+document.getElementById('adminNasabahPreviewBox').classList.add('hidden');
+
+selectedValidNasabahId = null;
+
+fetchAdminData();
+
+} else {
+
+alert(result.message || 'Transaksi gagal.');
+
+}
+
+} catch(err) {
+
+alert('Terjadi kesalahan jaringan.');
+
+}
+
+}
+
+​async function handleAdminRegisterNasabah(e) {
+
+e.preventDefault();
+
+const name = document.getElementById('adminRegName').value.trim();
+
+const address = document.getElementById('adminRegAddress').value.trim();
+
+const phone = document.getElementById('adminRegPhone').value.trim();
+
+const pin = document.getElementById('adminRegPin').value.trim();
+
+const btn = document.getElementById('adminRegSubmitBtn');
+
+​btn.disabled = true;
+
+btn.textContent = 'Membuat Rekening...';
+
+​try {
+
+const wargaList = adminDataNasabah.filter(n => String(n.ID_Nasabah).startsWith('NSB-'));
+
+const newId = 'NSB-' + String(wargaList.length + 1).padStart(3, '0');
+
+const newAcc = '8801 ' + Math.floor(1000 + Math.random() * 9000) + ' ' + Math.floor(10 + Math.random() * 90);
+
+​const now = new Date();
+
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+const dateStr = ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()};
+
+​const payloadData = {
+
+id: newId, name, address, phone, pin, acc: newAcc, balance: 0,
+
+dateStr, month: String(now.getMonth() + 1).padStart(2, '0'),
+
+year: String(now.getFullYear()), timestamp: Math.floor(Date.now() / 1000), refCode: 'REG-' + Date.now().toString().slice(-8)
+
+};
+
+​const res = await fetch(SCRIPT_URL, {
+
+method: 'POST',
+
+body: JSON.stringify({ action: 'registerNasabah', data: payloadData })
+
+});
+
+const result = await res.json();
+
+​if (result.status === 'success') {
+
+alert(Berhasil mendaftarkan nasabah baru!\nID: ${newId}\nNo. Rek: ${newAcc});
+
+closeModal('addNasabahModal');
+
+e.target.reset();
+
+fetchAdminData();
+
+} else {
+
+alert(result.message || 'Gagal mendaftarkan nasabah.');
+
+}
+
+} catch (err) {
+
+alert('Terjadi kesalahan jaringan.');
+
+} finally {
+
+btn.disabled = false;
+
+btn.textContent = 'Simpan & Terbitkan Rekening';
+
+}
+
+}
+
+​async function handleBroadcastSubmit(e) {
+
+e.preventDefault();
+
+const title = document.getElementById('bcTitle').value.trim();
+
+const badge = document.getElementById('bcBadge').value.trim();
+
+const desc = document.getElementById('bcDesc').value.trim();
+
+const theme = document.getElementById('bcTheme').value;
+
+​const btn1L = document.getElementById('bcBtn1Label').value.trim();
+
+const btn1U = document.getElementById('bcBtn1Url').value.trim();
+
+const btn2L = document.getElementById('bcBtn2Label').value.trim();
+
+const btn2U = document.getElementById('bcBtn2Url').value.trim();
+
+const btn3L = document.getElementById('bcBtn3Label').value.trim();
+
+const btn3U = document.getElementById('bcBtn3Url').value.trim();
+
+​const payload = {
+
+action: 'saveBroadcast',
+
+data: {
+
+id: 'BC-' + Date.now().toString().slice(-6),
+
+badge, title, desc, theme,
+
+btn1Label: btn1L, btn1Url: btn1U,
+
+btn2Label: btn2L, btn2Url: btn2U,
+
+btn3Label: btn3L, btn3Url: btn3U
+
+}
+
+};
+
+​try {
+
+const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+
+const result = await res.json();
+
+if (result.status === 'success') {
+
+alert('Broadcast iklan dengan multi-tombol berhasil dipublikasikan!');
+
+e.target.reset();
+
+updateBroadcastPreview();
+
+} else {
+
+alert('Gagal mempublikasikan broadcast.');
+
+}
+
+} catch(e) {
+
+alert('Gagal terhubung ke server.');
+
+}
+
+}
+
+​function renderAdminNasabah(list) {
+
+const container = document.getElementById('adminNasabahList');
+
+if(!container) return;
+
+container.innerHTML = '';
+
+list.forEach(n => {
+
+const div = document.createElement('div');
+
+div.className = 'p-3.5 bg-slate-950 border border-slate-800 rounded-2xl flex justify-between items-center text-xs';
+
+div.innerHTML = <div> <h4 class="font-bold text-white">${n.Nama}</h4> <p class="text-[10px] text-orange-400 font-mono">${n.ID_Nasabah} • ${n.No_Rekening}</p> </div> <div class="text-right"> <span class="font-extrabold text-orange-400 block">${formatRupiah(n.Saldo)}</span> </div>;
+
+container.appendChild(div);
+
+});
+
+}
+
+​function renderAdminMutasi(list) {
+
+const container = document.getElementById('adminMutasiList');
+
+if(!container) return;
+
+container.innerHTML = '';
+
+list.forEach(tx => {
+
+const div = document.createElement('div');
+
+div.className = 'p-3 bg-slate-950 border border-slate-800 rounded-2xl flex justify-between items-center text-xs';
+
+div.innerHTML = <div> <h4 class="font-bold text-white">${tx.Keterangan || tx.Jenis}</h4> <p class="text-[10px] text-slate-400">${tx.Nama_Nasabah} (${tx.ID_Nasabah}) • ${tx.Tanggal}</p> </div> <span class="font-mono font-bold text-orange-400">${formatRupiah(tx.Nominal)}</span>;
+
+container.appendChild(div);
+
+});
+
+}
+
+​window.addEventListener('DOMContentLoaded', () => {
+
+fetchAdminData();
+
+switchAdminTab('transaksi');
+
+});
+
+</script>
+
 </html>
+
