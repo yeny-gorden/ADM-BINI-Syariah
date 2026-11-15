@@ -1,1084 +1,763 @@
 <!DOCTYPE html>
 <html lang="id" class="dark">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BINI SYARIAH - Admin Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Pustaka Kamera QR Asli -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #020617; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>BINI Syariah (Professional Banking System)</title>
 
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-card { animation: fadeSlideUp 0.45s ease-out forwards; }
+ <!-- KONFIGURASI PWA -->
+ <link rel="manifest" href="./manifest.json">
+ <meta name="theme-color" content="#020617">
 
-        .admin-mesh {
-            background-image: 
-                radial-gradient(at 88% 12%, rgba(16, 185, 129, 0.24) 0px, transparent 55%),
-                radial-gradient(at 12% 88%, rgba(56, 189, 248, 0.22) 0px, transparent 55%),
-                linear-gradient(135deg, #0f172a 0%, #172554 55%, #064e3b 100%);
-        }
-
-        @media print {
-            body * { visibility: hidden; }
-            #printArea, #printArea * { visibility: visible; }
-            #printArea {
-                position: absolute; left: 0; top: 0; width: 100%;
-                background: #ffffff !important; color: #000000 !important; padding: 20px;
-            }
-            .no-print { display: none !important; }
-        }
-    </style>
+ <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+ <!-- LIBRARY SCANNER QR -->
+ <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
 
-    <div class="max-w-md mx-auto min-h-screen bg-slate-900 shadow-2xl shadow-black/80 flex flex-col justify-between relative overflow-x-hidden border-x border-slate-800/80 pb-24">
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-orange-500 selection:text-white">
+ <div class="max-w-md mx-auto min-h-screen bg-slate-900 shadow-2xl shadow-black/80 flex flex-col justify-between relative overflow-x-hidden border-x border-slate-800/80 pb-20">
+  
+  <div id="drawerBackdrop" onclick="toggleDrawer(false)" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-40 hidden transition-opacity duration-300 opacity-0"></div>
+  
+  <!-- HAMBURGER MENU DRAWER ADMIN -->
+  <aside id="navDrawer" class="fixed top-0 left-0 bottom-0 w-72 max-w-[82vw] bg-slate-950 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between">
+   <div>
+    <div class="p-6 bg-gradient-to-br from-slate-900 to-orange-950/60 border-b border-slate-800">
+     <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center space-x-2.5">
+       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-extrabold text-base tracking-tighter shadow-lg shadow-orange-500/30 border border-orange-400/40">
+        69
+       </div>
+       <div>
+        <span class="font-extrabold tracking-tight text-sm text-white block leading-tight">BINI <span class="text-orange-400">Syariah</span></span>
+        <span class="text-[9px] text-orange-300 font-semibold tracking-wider block uppercase">Suami Cari, Istri Menikmati</span>
+       </div>
+      </div>
+      <button onclick="toggleDrawer(false)" class="w-8 h-8 rounded-full bg-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center transition">
+       <i class="fa-solid fa-xmark"></i>
+      </button>
+     </div>
+    </div>
+    
+    <nav class="p-4 space-y-1.5">
+     <button onclick="toggleDrawer(false); switchAdminTab('dashboard')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+      <i class="fa-solid fa-chart-pie w-5 text-center text-orange-400"></i>
+      <span class="text-xs font-semibold">Dashboard & Statistik</span>
+     </button>
+     <button onclick="toggleDrawer(false); switchAdminTab('transaksi')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+      <i class="fa-solid fa-money-bill-transfer w-5 text-center text-emerald-400"></i>
+      <span class="text-xs font-semibold">Input Transaksi (011)</span>
+     </button>
+     <button onclick="toggleDrawer(false); switchAdminTab('nasabah')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+      <i class="fa-solid fa-users w-5 text-center text-amber-400"></i>
+      <span class="text-xs font-semibold">Data Nasabah</span>
+     </button>
+     <button onclick="toggleDrawer(false); switchAdminTab('broadcast')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+      <i class="fa-solid fa-bullhorn w-5 text-center text-sky-400"></i>
+      <span class="text-xs font-semibold">Broadcast & Pengumuman</span>
+     </button>
+     <!-- MENU KAS BANK DI BURGER -->
+     <button onclick="toggleDrawer(false); openKasBankModal()" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-orange-400 hover:bg-orange-500 hover:text-white transition text-left">
+      <i class="fa-solid fa-vault w-5 text-center text-orange-400"></i>
+      <span class="text-xs font-bold">Kas Pusat Bank (Kode 100)</span>
+     </button>
+     <button onclick="toggleDrawer(false); switchAdminTab('mutasi')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-orange-400 transition text-left">
+      <i class="fa-solid fa-receipt w-5 text-center text-orange-300"></i>
+      <span class="text-xs font-semibold">Mutasi Sistem</span>
+     </button>
+    </nav>
+   </div>
 
-        <!-- Overlay Backdrop Drawer -->
-        <div id="drawerBackdrop" onclick="toggleDrawer(false)" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-40 hidden transition-opacity duration-300 opacity-0"></div>
+   <div class="p-4 border-t border-slate-800/80">
+    <a href="admin-login.html" class="w-full flex items-center justify-center space-x-2 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-xs font-bold">
+     <i class="fa-solid fa-arrow-left"></i>
+     <span>Keluar Sesi Admin</span>
+    </a>
+   </div>
+  </aside>
 
-        <!-- HAMBURGER MENU DRAWER -->
-        <aside id="navDrawer" class="fixed top-0 left-0 bottom-0 w-72 max-w-[82vw] bg-slate-950 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between">
-            <div>
-                <div class="p-6 bg-gradient-to-br from-slate-900 to-sky-950/60 border-b border-slate-800">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-sky-500 flex items-center justify-center text-slate-950 font-extrabold text-sm">
-                                <i class="fa-solid fa-building-columns"></i>
-                            </div>
-                            <span class="font-extrabold tracking-tight text-base text-white">BINI<span class="text-emerald-400">SYARIAH</span></span>
-                        </div>
-                        <button onclick="toggleDrawer(false)" class="w-8 h-8 rounded-full bg-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center transition">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-                    <div class="flex items-center space-x-3 mt-2">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-sky-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 text-lg">
-                            AD
-                        </div>
-                        <div>
-                            <h3 id="drawerTellerName" class="font-bold text-sm text-white">Admin Teller</h3>
-                            <p class="text-[11px] text-emerald-400 font-medium flex items-center gap-1 mt-0.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Terhubung Google Sheets
-                            </p>
-                        </div>
-                    </div>
-                </div>
+  <!-- HEADER ADMIN -->
+  <header class="p-5 pt-6 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900">
+   <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center space-x-3">
+     <button onclick="toggleDrawer(true)" class="w-10 h-10 rounded-2xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center text-slate-200 hover:border-orange-500/50 hover:text-orange-400 transition">
+      <i class="fa-solid fa-bars-staggered text-base"></i>
+     </button>
+     <div>
+      <div class="flex items-center space-x-1.5">
+       <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+       <span class="text-[10px] text-orange-400 font-bold uppercase tracking-wider">ADMINISTRATOR SYSTEM</span>
+      </div>
+      <h1 class="text-xs font-bold text-white tracking-tight">BINI Syariah Central</h1>
+     </div>
+    </div>
+    <button onclick="fetchAdminData()" class="w-9 h-9 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-orange-400 transition">
+     <i class="fa-solid fa-arrows-rotate text-xs"></i>
+    </button>
+   </div>
+  </header>
 
-                <nav class="p-4 space-y-1.5">
-                    <button onclick="toggleDrawer(false); switchTab('transaksi')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-emerald-400 transition text-left">
-                        <i class="fa-solid fa-cash-register w-5 text-center text-emerald-400"></i>
-                        <span class="text-xs font-semibold">Setor & Tarik Tunai</span>
-                    </button>
-                    <button onclick="toggleDrawer(false); openModal('registerNasabahModal')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-emerald-400 transition text-left">
-                        <i class="fa-solid fa-user-plus w-5 text-center text-sky-400"></i>
-                        <span class="text-xs font-semibold">Daftar Akun Nasabah Baru</span>
-                    </button>
-                    <button onclick="toggleDrawer(false); switchTab('mutasi')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-emerald-400 transition text-left">
-                        <i class="fa-solid fa-file-pdf w-5 text-center text-sky-400"></i>
-                        <span class="text-xs font-semibold">Mutasi & Cetak PDF</span>
-                    </button>
-                    <button onclick="toggleDrawer(false); switchTab('broadcast')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-emerald-400 transition text-left">
-                        <i class="fa-solid fa-bullhorn w-5 text-center text-amber-400"></i>
-                        <span class="text-xs font-semibold">Broadcast & Iklan Carousel</span>
-                    </button>
-                    <button onclick="toggleDrawer(false); openModal('nasabahListModal')" class="w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-900 hover:text-emerald-400 transition text-left">
-                        <i class="fa-solid fa-users w-5 text-center text-purple-400"></i>
-                        <span class="text-xs font-semibold">Direktori ID Nasabah</span>
-                    </button>
-                </nav>
-            </div>
-
-            <div class="p-4 border-t border-slate-800/80">
-                <button onclick="handleLogout()" class="w-full flex items-center justify-center space-x-2 py-3 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-400 hover:bg-rose-500 hover:text-white transition text-xs font-bold active:scale-95">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Keluar (Logout)</span>
-                </button>
-            </div>
-        </aside>
-
-        <!-- HEADER -->
-        <header class="p-5 pt-6 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900">
-            <div class="flex justify-between items-center mb-5">
-                <div class="flex items-center space-x-3">
-                    <button onclick="toggleDrawer(true)" aria-label="Buka Menu Admin" class="w-10 h-10 rounded-2xl bg-slate-800/90 border border-slate-700/80 flex items-center justify-center text-slate-200 hover:border-emerald-500/50 hover:text-emerald-400 transition active:scale-95">
-                        <i class="fa-solid fa-bars-staggered text-base"></i>
-                    </button>
-                    <div>
-                        <div class="flex items-center space-x-1.5">
-                            <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                            <p id="syncStatusText" class="text-[11px] text-slate-400 font-medium">Menyinkronkan Sheet...</p>
-                        </div>
-                        <h1 class="text-sm font-bold text-white tracking-tight">BINI SYARIAH</h1>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <button onclick="syncFromGoogleSheets()" title="Refresh Data Sheet" class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-emerald-400 flex items-center justify-center transition">
-                        <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                    </button>
-                    <button onclick="openModal('registerNasabahModal')" class="px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-[11px] font-semibold text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-user-plus"></i>
-                        <span>+ Nasabah</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Kartu Status Kas -->
-            <div class="admin-mesh p-5 rounded-3xl border border-slate-700/80 shadow-2xl relative overflow-hidden animate-card">
-                <div class="flex justify-between items-center mb-3">
-                    <span class="px-2.5 py-1 rounded-lg bg-slate-950/60 border border-white/10 text-[10px] font-bold tracking-wider text-emerald-400 uppercase">
-                        Total Dana Nasabah di Sheet
-                    </span>
-                    <span class="text-[11px] text-slate-300 font-mono" id="totalCustomersBadge">0 Nasabah</span>
-                </div>
-
-                <h2 id="tellerCashDisplay" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-4">
-                    Rp 0
-                </h2>
-
-                <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-white/10 text-xs">
-                    <div class="bg-slate-950/45 px-3 py-2 rounded-xl border border-white/5">
-                        <span class="text-[10px] text-slate-400 block">Akumulasi Setoran</span>
-                        <strong id="totalSetorDisplay" class="text-emerald-400 font-bold text-xs">+Rp 0</strong>
-                    </div>
-                    <div class="bg-slate-950/45 px-3 py-2 rounded-xl border border-white/5">
-                        <span class="text-[10px] text-slate-400 block">Akumulasi Penarikan</span>
-                        <strong id="totalTarikDisplay" class="text-rose-400 font-bold text-xs">-Rp 0</strong>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- KONTEN UTAMA -->
-        <main class="px-5 flex-1 space-y-5">
-
-            <!-- TAB 1: TRANSAKSI SETOR & TARIK TUNAI -->
-            <section id="tab-transaksi" class="space-y-4 animate-card">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Transaksi Kas Teller</h3>
-                    <span class="text-[11px] text-emerald-400 font-medium"><i class="fa-solid fa-qrcode mr-1"></i>Scan / Input ID</span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
-                    <button type="button" id="btnModeSetor" onclick="setTxMode('SETOR')" class="py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs transition shadow-md">
-                        <i class="fa-solid fa-arrow-down mr-1.5"></i>Setor Tunai
-                    </button>
-                    <button type="button" id="btnModeTarik" onclick="setTxMode('TARIK')" class="py-2.5 rounded-xl text-slate-400 hover:text-white font-bold text-xs transition">
-                        <i class="fa-solid fa-arrow-up mr-1.5"></i>Tarik Tunai
-                    </button>
-                </div>
-
-                <form onsubmit="processTellerTransaction(event)" class="bg-slate-800/40 border border-slate-800 rounded-3xl p-4 space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">ID Nasabah</label>
-                        <div class="flex gap-2">
-                            <div class="flex-1 flex items-center bg-slate-950 border border-slate-700 focus-within:border-emerald-500 rounded-xl overflow-hidden">
-                                <span class="pl-3.5 pr-1 py-2.5 text-xs font-mono font-extrabold text-emerald-400 select-none">NSB-</span>
-                                <input type="text" id="inputCustomerId" oninput="lookupCustomer(this.value)" inputmode="numeric" maxlength="5" required placeholder="001" class="w-full bg-transparent pr-3.5 py-2.5 text-xs font-mono uppercase text-white focus:outline-none">
-                            </div>
-                            <button type="button" onclick="openScannerCamera()" class="px-3.5 py-2.5 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-400 hover:bg-sky-500 hover:text-slate-950 font-bold text-xs transition flex items-center gap-1.5 shrink-0">
-                                <i class="fa-solid fa-qrcode"></i>
-                                <span>Scan Kamera</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="customerInfoBox" class="bg-slate-950/90 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs" id="custAvatar">?</div>
-                            <div>
-                                <h4 id="custNameDisplay" class="text-xs font-bold text-slate-300">Ketik angka ID Nasabah</h4>
-                                <p id="custAccDisplay" class="text-[10px] text-slate-500">Daftarkan nasabah via menu burger jika belum ada</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[9px] text-slate-500 block">Saldo</span>
-                            <strong id="custBalanceDisplay" class="text-xs font-extrabold text-emerald-400">Rp 0</strong>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Nominal Transaksi (Rp)</label>
-                        <input type="number" id="inputTxAmount" required min="1000" step="500" placeholder="Masukkan nominal" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-3 text-base font-extrabold text-white focus:outline-none focus:border-emerald-500">
-                        <div class="flex gap-2 mt-2">
-                            <button type="button" onclick="document.getElementById('inputTxAmount').value=50000" class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-300 hover:bg-slate-700">50rb</button>
-                            <button type="button" onclick="document.getElementById('inputTxAmount').value=100000" class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-300 hover:bg-slate-700">100rb</button>
-                            <button type="button" onclick="document.getElementById('inputTxAmount').value=500000" class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-300 hover:bg-slate-700">500rb</button>
-                            <button type="button" onclick="document.getElementById('inputTxAmount').value=1000000" class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-300 hover:bg-slate-700">1 Jt</button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Keterangan Teller (Opsional)</label>
-                        <input type="text" id="inputTxNote" placeholder="Contoh: Setoran tabungan" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
-                    </div>
-
-                    <button type="submit" id="submitTxBtn" class="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition active:scale-98">
-                        Proses Setor Tunai Sekarang
-                    </button>
-                </form>
-
-                <!-- Preview Carousel Broadcast -->
-                <div class="pt-1">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Banner Broadcast Aktif</span>
-                        <button onclick="switchTab('broadcast')" class="text-[11px] text-amber-400 font-semibold hover:underline">Kelola Iklan</button>
-                    </div>
-                    <div id="liveCarouselContainer" class="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950"></div>
-                </div>
-            </section>
-
-            <!-- TAB 2: MUTASI & CETAK PDF -->
-            <section id="tab-mutasi" class="hidden space-y-4 animate-card">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="text-sm font-bold text-white">Mutasi & Cetak e-Statement</h3>
-                        <p class="text-[11px] text-slate-400">Sortir per nasabah, bulan, & tahun</p>
-                    </div>
-                    <button onclick="printMutasiPDF()" class="px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs shadow-lg shadow-rose-500/25 flex items-center gap-1.5 transition active:scale-95">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Cetak PDF</span>
-                    </button>
-                </div>
-
-                <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
-                    <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 mb-1">Pilih Nasabah</label>
-                        <select id="filterNasabah" onchange="renderFilteredMutasi()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500">
-                            <option value="ALL">Semua Nasabah</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 mb-1">Bulan</label>
-                            <select id="filterBulan" onchange="renderFilteredMutasi()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-                                <option value="ALL">Semua</option>
-                                <option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option>
-                                <option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option>
-                                <option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
-                                <option value="10">Oktober</option><option value="11" selected>November</option><option value="12">Desember</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 mb-1">Tahun</label>
-                            <select id="filterTahun" onchange="renderFilteredMutasi()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-                                <option value="ALL">Semua</option><option value="2026" selected>2026</option><option value="2025">2025</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 mb-1">Urutan</label>
-                            <select id="sortOrder" onchange="renderFilteredMutasi()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-                                <option value="DESC">Terbaru</option><option value="ASC">Terlama</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="printArea" class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
-                    <div class="border-b border-slate-800 pb-2.5 flex justify-between items-center">
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">LAPORAN MUTASI REKENING</h4>
-                            <p id="printSubtitle" class="text-[10px] text-slate-400">Periode: November 2026 • Semua Nasabah</p>
-                        </div>
-                        <span class="text-[10px] font-mono text-emerald-400 font-bold" id="mutasiCountBadge">0 Transaksi</span>
-                    </div>
-                    <div id="mutasiResultList" class="space-y-2"></div>
-                </div>
-            </section>
-
-            <!-- TAB 3: BROADCAST & CAROUSEL -->
-            <section id="tab-broadcast" class="hidden space-y-4 animate-card">
-                <div>
-                    <h3 class="text-sm font-bold text-white">Broadcast Pesan & Iklan Carousel</h3>
-                    <p class="text-[11px] text-slate-400">Kelola pengumuman & promo di Google Sheets</p>
-                </div>
-
-                <form onsubmit="addBroadcastSlide(event)" class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Badge / Kategori Promo</label>
-                        <input type="text" id="bcBadge" required placeholder="Contoh: INFO BANK" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Judul Pesan Broadcast</label>
-                        <input type="text" id="bcTitle" required placeholder="Judul pengumuman..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Isi Pesan Singkat</label>
-                        <input type="text" id="bcDesc" required placeholder="Keterangan singkat..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Warna Tema Banner</label>
-                        <select id="bcTheme" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                            <option value="from-emerald-950 via-slate-900 to-teal-900 border-emerald-500/40">Hijau Emerald</option>
-                            <option value="from-indigo-950 via-slate-900 to-sky-900 border-sky-500/40">Biru Indigo</option>
-                            <option value="from-amber-950 via-slate-900 to-orange-950 border-amber-500/40">Emas Amber</option>
-                        </select>
-                    </div>
-                    <button type="submit" id="btnSaveBroadcast" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition">
-                        <i class="fa-solid fa-paper-plane mr-1.5"></i>Simpan & Tayangkan
-                    </button>
-                </form>
-
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Daftar Slide di Sheet</h4>
-                    <div id="broadcastManageList" class="space-y-2.5"></div>
-                </div>
-            </section>
-
-        </main>
-
-        <!-- BOTTOM NAVIGATION -->
-        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 py-2.5 px-6 flex justify-around items-center z-30 no-print">
-            <button onclick="switchTab('transaksi')" id="nav-transaksi" class="flex flex-col items-center text-emerald-400 transition">
-                <i class="fa-solid fa-cash-register text-base"></i>
-                <span class="text-[10px] mt-1 font-semibold">Transaksi</span>
-            </button>
-            <button onclick="switchTab('mutasi')" id="nav-mutasi" class="flex flex-col items-center text-slate-400 hover:text-emerald-400 transition">
-                <i class="fa-solid fa-file-invoice-dollar text-base"></i>
-                <span class="text-[10px] mt-1 font-semibold">Mutasi & PDF</span>
-            </button>
-            <button onclick="switchTab('broadcast')" id="nav-broadcast" class="flex flex-col items-center text-slate-400 hover:text-emerald-400 transition">
-                <i class="fa-solid fa-bullhorn text-base"></i>
-                <span class="text-[10px] mt-1 font-semibold">Broadcast</span>
-            </button>
-        </nav>
-
+  <!-- KONTEN UTAMA ADMIN -->
+  <main class="px-5 flex-1 space-y-4 py-3">
+   
+   <!-- 1. TAB DASHBOARD (DENGAN KARTU PENGATURAN NOMINAL POTONGAN BULANAN) -->
+   <section id="admin-dashboard" class="space-y-4 hidden">
+    <div class="grid grid-cols-2 gap-3">
+     <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+      <span class="text-[10px] text-slate-400 block">Total Nasabah Aktif</span>
+      <h3 id="statTotalNasabah" class="text-xl font-extrabold text-white mt-1">0</h3>
+     </div>
+     <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+      <span class="text-[10px] text-slate-400 block">Total Simpanan Nasabah</span>
+      <h3 id="statTotalSaldo" class="text-sm font-extrabold text-orange-400 mt-1">Rp 0</h3>
+     </div>
+    </div>
+    <div class="bg-orange-600/10 border border-orange-500/30 p-4 rounded-2xl flex justify-between items-center">
+     <div>
+      <h4 class="text-xs font-bold text-white">Akumulasi Kas Pusat Bank</h4>
+      <p class="text-[10px] text-slate-400 mt-0.5">Pemeliharaan bulanan otomatis (Kode 100)</p>
+     </div>
+     <button onclick="openKasBankModal()" class="px-3 py-2 rounded-xl bg-orange-600 text-white font-bold text-xs hover:bg-orange-500 transition">
+      Cek Kas
+     </button>
     </div>
 
-    <!-- MODAL PENDAFTARAN NASABAH BARU -->
-    <div id="registerNasabahModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
-                        <i class="fa-solid fa-user-plus text-xs"></i>
-                    </div>
-                    <h3 class="font-bold text-sm text-white">Pendaftaran Nasabah Baru</h3>
-                </div>
-                <button onclick="closeModal('registerNasabahModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+    <!-- PENGATURAN NOMINAL POTONGAN BULANAN LANGSUNG DARI ADMIN -->
+    <div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-3">
+     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+      <i class="fa-solid fa-gear text-orange-400"></i> Pengaturan Potongan Bulanan (Kode 100)
+     </h3>
+     <form onsubmit="handleSaveSetting(event)" class="space-y-3">
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1">Nominal Potongan Biaya Per Bulan (Rp)</label>
+       <input type="number" id="settingNominalPotongan" required min="0" placeholder="5000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-extrabold text-orange-400 focus:outline-none focus:border-orange-500">
+      </div>
+      <button type="submit" id="btnSaveSetting" class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition">
+       Simpan Pengaturan Potongan
+      </button>
+     </form>
+    </div>
+   </section>
 
-            <form onsubmit="handleRegisterNasabah(event)" class="space-y-3">
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Nama Lengkap Nasabah</label>
-                    <input type="text" id="regName" required placeholder="Nama lengkap" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-sky-500">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Alamat Domisili</label>
-                    <input type="text" id="regAddress" required placeholder="Alamat lengkap" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-sky-500">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">No. Telepon / WhatsApp</label>
-                    <input type="tel" id="regPhone" required placeholder="08xxxxxxxxxx" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-sky-500">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">PIN Default Awal (6 Digit)</label>
-                    <input type="password" id="regPin" required maxlength="6" placeholder="••••••" class="w-full tracking-widest text-center font-bold bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-sky-500">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Setoran Awal Pembukaan Rekening (Rp)</label>
-                    <input type="number" id="regInitialDeposit" required min="0" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-extrabold text-emerald-400 focus:outline-none focus:border-sky-500">
-                </div>
-
-                <button type="submit" id="btnRegisterSubmit" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-xs transition mt-2">
-                    Simpan ke Google Sheets
-                </button>
-            </form>
+   <!-- 2. TAB TRANSAKSI UTAMA (DENGAN SCANNER & AUTOCOMPLETE NAMA/ALAMAT) -->
+   <section id="admin-transaksi" class="space-y-4">
+    <div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+     <h3 class="text-sm font-bold text-white flex items-center gap-2">
+      <i class="fa-solid fa-money-bill-transfer text-emerald-400"></i> Setor / Tarik Tunai Teller (Kode 011)
+     </h3>
+     <form onsubmit="handleAdminTransactionSubmit(event)" class="space-y-3">
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1.5">ID Nasabah atau No. Rekening</label>
+       <div class="flex gap-2">
+        <div class="flex-1 flex items-center bg-slate-900 border border-slate-700 focus-within:border-orange-500 rounded-xl px-3">
+         <input type="text" id="adminTxNasabahInput" oninput="lookupAdminNasabah(this.value)" required placeholder="NSB-001 atau No. Rek" class="w-full bg-transparent py-2.5 text-xs text-white uppercase font-mono focus:outline-none">
         </div>
+        <button type="button" onclick="openAdminScanner()" class="px-3 py-2.5 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-400 hover:bg-orange-500 hover:text-slate-950 font-bold text-xs transition flex items-center gap-1 shrink-0">
+         <i class="fa-solid fa-qrcode"></i>
+         <span>Scan</span>
+        </button>
+       </div>
+       <!-- KOTAK INFO NAMA & ALAMAT OTOMATIS -->
+       <div id="adminNasabahPreviewBox" class="mt-2 p-3 bg-slate-900/90 border border-slate-800 rounded-xl hidden text-xs space-y-1">
+        <div class="flex justify-between"><span class="text-slate-400">Nama Nasabah:</span><span id="previewNama" class="font-bold text-white">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Alamat:</span><span id="previewAlamat" class="text-orange-300">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Saldo Efektif:</span><span id="previewSaldo" class="font-extrabold text-emerald-400">-</span></div>
+       </div>
+      </div>
+
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1">Jenis Transaksi</label>
+       <select id="adminTxType" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+        <option value="SETOR">Setor Tunai (+)</option>
+        <option value="TARIK">Tarik Tunai (-)</option>
+       </select>
+      </div>
+
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1">Nominal (Rp)</label>
+       <input type="number" id="adminTxAmount" required min="1000" placeholder="50000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-extrabold text-orange-400 focus:outline-none focus:border-orange-500">
+      </div>
+
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1">Keterangan / Catatan</label>
+       <input type="text" id="adminTxNote" placeholder="Contoh: Setoran tunai di kantor layanan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+      </div>
+
+      <button type="submit" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30">
+       Proses Transaksi Teller
+      </button>
+     </form>
     </div>
+   </section>
 
-    <!-- MODAL SCANNER KAMERA NYATA -->
-    <div id="scannerModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-sm text-white">Scan QR Kartu Nasabah</h3>
-                <button onclick="closeScannerCamera()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="relative bg-slate-950 border border-slate-800 rounded-2xl h-64 flex flex-col items-center justify-center overflow-hidden">
-                <div id="reader" class="w-full h-full"></div>
-            </div>
-            <span class="text-[10px] text-slate-400">Arahkan kamera ke QR Code Nasabah</span>
-        </div>
+   <!-- 3. TAB DATA NASABAH (DENGAN TOMBOL TAMBAH NASABAH BARU) -->
+   <section id="admin-nasabah" class="hidden space-y-3">
+    <div class="flex justify-between items-center">
+     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Direktori Rekening Nasabah</h3>
+     <button onclick="openModal('addNasabahModal')" class="px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg shadow-orange-600/30 transition flex items-center gap-1.5">
+      <i class="fa-solid fa-user-plus"></i>
+      <span>+ Nasabah Baru</span>
+     </button>
     </div>
+    <div id="adminNasabahList" class="space-y-2"></div>
+   </section>
 
-    <!-- MODAL DIREKTORI NASABAH -->
-    <div id="nasabahListModal" class="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-base text-white">Direktori Nasabah (Google Sheets)</h3>
-                <button onclick="closeModal('nasabahListModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div id="directoryListContainer" class="space-y-2.5 max-h-80 overflow-y-auto"></div>
-        </div>
+   <!-- 4. TAB BROADCAST & PENGUMUMAN (DENGAN LIVE PREVIEW & HINGGA 3 TOMBOL SEJAJAR) -->
+   <section id="admin-broadcast" class="hidden space-y-4">
+    <div class="bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-4">
+     <h3 class="text-sm font-bold text-white flex items-center gap-2">
+      <i class="fa-solid fa-bullhorn text-sky-400"></i> Publikasi Broadcast & Pengumuman
+     </h3>
+     <form onsubmit="handleBroadcastSubmit(event)" class="space-y-3">
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1">Judul Pengumuman</label>
+       <input type="text" id="bcTitle" oninput="updateBroadcastPreview()" required placeholder="Contoh: Pembaruan Sistem Layanan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+      </div>
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1">Badge / Kategori</label>
+       <input type="text" id="bcBadge" oninput="updateBroadcastPreview()" required placeholder="Contoh: INFORMASI RESMI" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+      </div>
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1">Isi Pesan / Deskripsi</label>
+       <textarea id="bcDesc" oninput="updateBroadcastPreview()" required rows="3" placeholder="Tulis rincian informasi di sini..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"></textarea>
+      </div>
+      
+      <!-- PENGATURAN TOMBOL 1, 2, 3 BERJEJER -->
+      <div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
+       <span class="text-[11px] font-bold text-orange-400 block"><i class="fa-solid fa-link mr-1"></i> Tombol Interaktif Sejajar (Hingga 3 Tombol)</span>
+       
+       <!-- Tombol 1 -->
+       <div class="grid grid-cols-2 gap-2">
+        <input type="text" id="bcBtn1Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 1" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+        <input type="url" id="bcBtn1Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+       </div>
+       <!-- Tombol 2 -->
+       <div class="grid grid-cols-2 gap-2">
+        <input type="text" id="bcBtn2Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 2 (Opsional)" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+        <input type="url" id="bcBtn2Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+       </div>
+       <!-- Tombol 3 -->
+       <div class="grid grid-cols-2 gap-2">
+        <input type="text" id="bcBtn3Label" oninput="updateBroadcastPreview()" placeholder="Label Tombol 3 (Opsional)" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+        <input type="url" id="bcBtn3Url" placeholder="https://..." class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+       </div>
+      </div>
+
+      <div>
+       <label class="block text-xs font-semibold text-slate-300 mb-1">Tema Warna Banner</label>
+       <select id="bcTheme" onchange="updateBroadcastPreview()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+        <option value="from-orange-950/80 to-slate-900 border-orange-500/40">Tema Orange Elegan</option>
+        <option value="from-emerald-950/80 to-slate-900 border-emerald-500/40">Tema Hijau Syariah</option>
+        <option value="from-sky-950/80 to-slate-900 border-sky-500/40">Tema Biru Informasi</option>
+       </select>
+      </div>
+
+      <!-- KOTAK LIVE PREVIEW -->
+      <div class="space-y-1.5">
+       <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pratinjau Langsung (Live Preview):</span>
+       <div id="broadcastLivePreviewContainer"></div>
+      </div>
+
+      <button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition shadow-lg shadow-sky-600/30">
+       Publikasikan Broadcast
+      </button>
+     </form>
     </div>
+   </section>
 
-    <!-- MODAL STRUK VALIDASI + KIRIM WA PDF -->
-    <div id="receiptModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4">
-            <div class="text-center border-b border-dashed border-slate-700 pb-3 mb-2">
-                <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-2 text-xl">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <span id="rcpBadge" class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">TRANSAKSI BERHASIL</span>
-                <h3 id="rcpAmount" class="text-2xl font-extrabold text-white mt-1">Rp 0</h3>
-                <p id="rcpDate" class="text-[11px] text-slate-400 mt-0.5">-</p>
-            </div>
-            <div class="space-y-2 text-xs">
-                <div class="flex justify-between"><span class="text-slate-400">No. Referensi</span><span id="rcpRef" class="font-mono text-slate-200">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">ID Nasabah</span><span id="rcpCustId" class="font-mono font-bold text-sky-400">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">Nama Nasabah</span><span id="rcpCustName" class="font-bold text-white">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">No. WhatsApp</span><span id="rcpCustPhone" class="font-mono text-slate-300">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-400">Saldo Akhir</span><span id="rcpFinalBalance" class="font-bold text-emerald-400">Rp 0</span></div>
-            </div>
+   <!-- 5. TAB MUTASI -->
+   <section id="admin-mutasi" class="hidden space-y-3">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Jurnal Mutasi Transaksi Sistem</h3>
+    <div id="adminMutasiList" class="space-y-2"></div>
+   </section>
 
-            <div class="space-y-2 pt-2">
-                <button onclick="sendReceiptToWhatsApp()" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition">
-                    <i class="fa-brands fa-whatsapp text-base"></i>
-                    <span>Unduh PDF & Kirim ke WhatsApp</span>
-                </button>
-                <button onclick="closeModal('receiptModal')" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">
-                    Tutup
-                </button>
-            </div>
-        </div>
+  </main>
+
+  <!-- MODAL TAMBAH NASABAH BARU OLEH ADMIN -->
+  <div id="addNasabahModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+   <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 animate-card">
+    <div class="flex justify-between items-center">
+     <h3 class="font-bold text-sm text-white flex items-center gap-2">
+      <i class="fa-solid fa-user-plus text-orange-400"></i> Pendaftaran Rekening Nasabah Baru
+     </h3>
+     <button onclick="closeModal('addNasabahModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+      <i class="fa-solid fa-xmark"></i>
+     </button>
     </div>
-
-    <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[70] w-[90%] max-w-sm pointer-events-none space-y-2"></div>
-
-    <script>
-        if (!sessionStorage.getItem('isLoggedIn') || sessionStorage.getItem('isLoggedIn') !== 'true') {
-            window.location.href = 'index.html';
-        }
-
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu0kGhiGxqD1wH5MeqWxIDMfep_SsTLYkpYMnjwzGJNu2kUPAW8T83SL2C1t52CH9r/exec";
-
-        let customers = [];
-        let mutasiData = [];
-        let broadcastSlides = [];
-        let currentTxMode = 'SETOR';
-        let activeCarouselIdx = 0;
-        let lastTransactionReceipt = null;
-        let html5QrCode = null;
-
-        function formatRupiah(num) {
-            return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
-        }
-
-        function normalizeCustomerId(rawInput) {
-            let clean = String(rawInput || '').trim().toUpperCase();
-            if (clean.startsWith('NSB-')) clean = clean.replace('NSB-', '');
-            return clean ? 'NSB-' + clean : '';
-        }
-
-        async function syncFromGoogleSheets() {
-            const syncDot = document.getElementById('syncDot');
-            const syncText = document.getElementById('syncStatusText');
-            syncDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-            syncText.textContent = 'Menyinkronkan Sheet...';
-
-            try {
-                const res = await fetch(`${SCRIPT_URL}?action=getAllData`);
-                const data = await res.json();
-
-                if (data.status === 'success') {
-                    customers = (data.nasabah || []).map(row => ({
-                        id: String(row.ID_Nasabah),
-                        name: String(row.Nama),
-                        address: String(row.Alamat),
-                        phone: String(row.Telepon_WA),
-                        pin: String(row.PIN),
-                        acc: String(row.No_Rekening),
-                        balance: Number(row.Saldo || 0),
-                        avatar: String(row.Nama || 'NS').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                    }));
-
-                    mutasiData = (data.mutasi || []).map(row => ({
-                        id: String(row.No_Ref),
-                        custId: String(row.ID_Nasabah),
-                        custName: String(row.Nama_Nasabah),
-                        type: String(row.Jenis),
-                        amount: Number(row.Nominal || 0),
-                        date: String(row.Tanggal),
-                        month: String(row.Bulan).padStart(2, '0'),
-                        year: String(row.Tahun),
-                        timestamp: Number(row.Timestamp || 0),
-                        note: String(row.Keterangan || '-')
-                    }));
-
-                    broadcastSlides = (data.broadcast || []).map(row => ({
-                        id: String(row.ID_Slide),
-                        badge: String(row.Badge),
-                        title: String(row.Judul),
-                        desc: String(row.Deskripsi),
-                        theme: String(row.Tema)
-                    }));
-
-                    updateSummaryCards();
-                    renderLiveCarousel();
-                    syncDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
-                    syncText.textContent = 'Tersinkronisasi';
-                }
-            } catch (err) {
-                syncDot.className = 'w-2 h-2 rounded-full bg-rose-500';
-                syncText.textContent = 'Offline / Gagal Koneksi';
-                showToast('Gagal memuat data dari Google Sheets.', 'error');
-            }
-        }
-
-        function updateSummaryCards() {
-            const totalSaldoNasabah = customers.reduce((sum, c) => sum + c.balance, 0);
-            const totalSetor = mutasiData.filter(m => m.type === 'SETOR').reduce((sum, m) => sum + m.amount, 0);
-            const totalTarik = mutasiData.filter(m => m.type === 'TARIK').reduce((sum, m) => sum + m.amount, 0);
-
-            document.getElementById('tellerCashDisplay').textContent = formatRupiah(totalSaldoNasabah);
-            document.getElementById('totalCustomersBadge').textContent = `${customers.length} Nasabah`;
-            document.getElementById('totalSetorDisplay').textContent = '+' + formatRupiah(totalSetor);
-            document.getElementById('totalTarikDisplay').textContent = '-' + formatRupiah(totalTarik);
-        }
-
-        function toggleDrawer(show) {
-            const drawer = document.getElementById('navDrawer');
-            const backdrop = document.getElementById('drawerBackdrop');
-            if (show) {
-                backdrop.classList.remove('hidden');
-                setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
-                drawer.classList.remove('-translate-x-full');
-            } else {
-                drawer.classList.add('-translate-x-full');
-                backdrop.classList.add('opacity-0');
-                setTimeout(() => backdrop.classList.add('hidden'), 300);
-            }
-        }
-
-        function handleLogout() {
-            sessionStorage.removeItem('isLoggedIn');
-            sessionStorage.removeItem('tellerName');
-            showToast('Mengakhiri sesi admin...', 'warning');
-            setTimeout(() => { window.location.href = 'index.html'; }, 700);
-        }
-
-        function switchTab(tabName) {
-            ['transaksi', 'mutasi', 'broadcast'].forEach(t => {
-                document.getElementById('tab-' + t).classList.add('hidden');
-                document.getElementById('nav-' + t).className = 'flex flex-col items-center text-slate-400 hover:text-emerald-400 transition';
-            });
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.getElementById('nav-' + tabName).className = 'flex flex-col items-center text-emerald-400 transition';
-
-            if (tabName === 'mutasi') {
-                populateNasabahFilterDropdown();
-                renderFilteredMutasi();
-            }
-            if (tabName === 'broadcast') renderBroadcastManager();
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            if (id === 'nasabahListModal') renderCustomerDirectory();
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        // FUNGSI KAMERA QR NYATA
-        function openScannerCamera() {
-            openModal('scannerModal');
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
-            }
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 200, height: 200 } },
-                (decodedText) => {
-                    handleSuccessfulScan(decodedText);
-                },
-                (errorMessage) => {}
-            ).catch(err => {
-                showToast("Akses kamera ditolak / gagal.", "error");
-            });
-        }
-
-        function closeScannerCamera() {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => closeModal('scannerModal')).catch(() => closeModal('scannerModal'));
-            } else {
-                closeModal('scannerModal');
-            }
-        }
-
-        function handleSuccessfulScan(scannedText) {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    closeModal('scannerModal');
-                    processScannedResult(scannedText);
-                });
-            } else {
-                closeModal('scannerModal');
-                processScannedResult(scannedText);
-            }
-        }
-
-        function processScannedResult(text) {
-            let cleanId = text.trim();
-            if (cleanId.includes('NSB-')) cleanId = cleanId.split('NSB-')[1];
-            document.getElementById('inputCustomerId').value = cleanId;
-            lookupCustomer(cleanId);
-            showToast(`QR Terbaca: NSB-${cleanId}`, 'success');
-        }
-
-        async function handleRegisterNasabah(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnRegisterSubmit');
-            btn.disabled = true;
-            btn.textContent = 'Menyimpan ke Sheet...';
-
-            const name = document.getElementById('regName').value.trim();
-            const address = document.getElementById('regAddress').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const pin = document.getElementById('regPin').value.trim();
-            const initialDeposit = Number(document.getElementById('regInitialDeposit').value || 0);
-
-            const newIdNum = customers.length + 1;
-            const newId = 'NSB-' + String(newIdNum).padStart(3, '0');
-            const newAcc = '8801 ' + Math.floor(1000 + Math.random() * 9000) + ' ' + Math.floor(10 + Math.random() * 90);
-
-            const now = new Date();
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-            const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-            const refCode = 'TLR-' + Date.now().toString().slice(-8);
-
-            const payloadData = {
-                id: newId, name, address, phone, pin, acc: newAcc,
-                balance: initialDeposit, dateStr,
-                month: String(now.getMonth() + 1).padStart(2, '0'),
-                year: String(now.getFullYear()),
-                timestamp: Math.floor(Date.now() / 1000),
-                refCode
-            };
-
-            try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'registerNasabah', data: payloadData })
-                });
-                const result = await res.json();
-
-                if (result.status === 'success') {
-                    await syncFromGoogleSheets();
-                    closeModal('registerNasabahModal');
-                    e.target.reset();
-                    showToast(`Nasabah ${name} (${newId}) tersimpan!`, 'success');
-                    document.getElementById('inputCustomerId').value = newId.replace('NSB-', '');
-                    lookupCustomer(newId);
-                }
-            } catch (err) {
-                showToast('Gagal menyimpan nasabah.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Simpan ke Google Sheets';
-            }
-        }
-
-        function setTxMode(mode) {
-            currentTxMode = mode;
-            const btnSetor = document.getElementById('btnModeSetor');
-            const btnTarik = document.getElementById('btnModeTarik');
-            const submitBtn = document.getElementById('submitTxBtn');
-
-            if (mode === 'SETOR') {
-                btnSetor.className = 'py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs transition shadow-md';
-                btnTarik.className = 'py-2.5 rounded-xl text-slate-400 hover:text-white font-bold text-xs transition';
-                submitBtn.className = 'w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition';
-                submitBtn.textContent = 'Proses Setor Tunai Sekarang';
-            } else {
-                btnTarik.className = 'py-2.5 rounded-xl bg-rose-500 text-white font-extrabold text-xs transition shadow-md';
-                btnSetor.className = 'py-2.5 rounded-xl text-slate-400 hover:text-white font-bold text-xs transition';
-                submitBtn.className = 'w-full py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs shadow-lg shadow-rose-500/20 transition';
-                submitBtn.textContent = 'Proses Tarik Tunai Sekarang';
-            }
-        }
-
-        function lookupCustomer(query) {
-            const fullId = normalizeCustomerId(query);
-            const found = customers.find(c => c.id === fullId);
-            const avatarEl = document.getElementById('custAvatar');
-            const nameEl = document.getElementById('custNameDisplay');
-            const accEl = document.getElementById('custAccDisplay');
-            const balEl = document.getElementById('custBalanceDisplay');
-
-            if (found) {
-                avatarEl.textContent = found.avatar;
-                avatarEl.className = 'w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold text-xs';
-                nameEl.textContent = found.name;
-                nameEl.className = 'text-xs font-bold text-white';
-                accEl.textContent = `${found.id} • WA: ${found.phone}`;
-                balEl.textContent = formatRupiah(found.balance);
-            } else {
-                avatarEl.textContent = '?';
-                avatarEl.className = 'w-9 h-9 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs';
-                nameEl.textContent = fullId ? `ID ${fullId} tidak ditemukan` : 'Ketik angka ID Nasabah';
-                nameEl.className = fullId ? 'text-xs font-bold text-rose-400' : 'text-xs font-bold text-slate-300';
-                accEl.textContent = 'Daftarkan nasabah via menu burger jika belum ada';
-                balEl.textContent = 'Rp 0';
-            }
-        }
-
-        async function processTellerTransaction(e) {
-            e.preventDefault();
-            const fullId = normalizeCustomerId(document.getElementById('inputCustomerId').value);
-            const amount = Number(document.getElementById('inputTxAmount').value);
-            const note = document.getElementById('inputTxNote').value.trim();
-
-            const customer = customers.find(c => c.id === fullId);
-            if (!customer) {
-                showToast('ID Nasabah tidak ditemukan!', 'error');
-                return;
-            }
-
-            if (currentTxMode === 'TARIK' && amount > customer.balance) {
-                showToast(`Saldo ${customer.name} tidak mencukupi!`, 'error');
-                return;
-            }
-
-            const submitBtn = document.getElementById('submitTxBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Memproses ke Sheet...';
-
-            const now = new Date();
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-            const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-            const refCode = 'TLR-' + Date.now().toString().slice(-8);
-
-            const txPayload = {
-                id: refCode, custId: customer.id, custName: customer.name,
-                type: currentTxMode, amount: amount, date: dateStr,
-                month: String(now.getMonth() + 1).padStart(2, '0'),
-                year: String(now.getFullYear()),
-                timestamp: Math.floor(Date.now() / 1000),
-                note: note || (currentTxMode === 'SETOR' ? 'Setor Tunai Loket' : 'Tarik Tunai Loket')
-            };
-
-            try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'processTransaction', data: txPayload })
-                });
-                const result = await res.json();
-
-                if (result.status === 'success') {
-                    await syncFromGoogleSheets();
-                    lookupCustomer(customer.id);
-
-                    lastTransactionReceipt = {
-                        ...txPayload,
-                        custPhone: customer.phone,
-                        finalBalance: result.finalBalance
-                    };
-
-                    document.getElementById('rcpBadge').textContent = currentTxMode === 'SETOR' ? 'SETOR TUNAI BERHASIL' : 'TARIK TUNAI BERHASIL';
-                    document.getElementById('rcpBadge').className = `text-[10px] font-bold uppercase tracking-widest ${currentTxMode === 'SETOR' ? 'text-emerald-400' : 'text-rose-400'}`;
-                    document.getElementById('rcpAmount').textContent = formatRupiah(amount);
-                    document.getElementById('rcpDate').textContent = dateStr;
-                    document.getElementById('rcpRef').textContent = refCode;
-                    document.getElementById('rcpCustId').textContent = customer.id;
-                    document.getElementById('rcpCustName').textContent = customer.name;
-                    document.getElementById('rcpCustPhone').textContent = customer.phone;
-                    document.getElementById('rcpFinalBalance').textContent = formatRupiah(result.finalBalance);
-                    openModal('receiptModal');
-
-                    document.getElementById('inputTxAmount').value = '';
-                    document.getElementById('inputTxNote').value = '';
-                } else {
-                    showToast(result.message || 'Transaksi ditolak.', 'error');
-                }
-            } catch (err) {
-                showToast('Gagal menghubungi server Google Sheets.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                setTxMode(currentTxMode);
-            }
-        }
-
-        function sendReceiptToWhatsApp() {
-            if (!lastTransactionReceipt) return;
-            const tx = lastTransactionReceipt;
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, 130] });
-
-                doc.setFont("Helvetica", "bold");
-                doc.setFontSize(11);
-                doc.text("BINI SYARIAH - BANK MINI", 40, 10, { align: "center" });
-                
-                doc.setFontSize(8);
-                doc.setFont("Helvetica", "normal");
-                doc.text("Bukti Transaksi Resmi Teller", 40, 15, { align: "center" });
-                doc.text("-------------------------------------------------------------", 40, 19, { align: "center" });
-
-                doc.text(`Ref: ${tx.id}`, 8, 25);
-                doc.text(`Tanggal: ${tx.date}`, 8, 30);
-                doc.text(`ID Nasabah: ${tx.custId}`, 8, 35);
-                doc.text(`Nama: ${tx.custName}`, 8, 40);
-                doc.text(`Jenis: ${tx.type === 'SETOR' ? 'SETOR TUNAI' : 'TARIK TUNAI'}`, 8, 45);
-                doc.text(`Keterangan: ${tx.note}`, 8, 50);
-
-                doc.text("-------------------------------------------------------------", 40, 56, { align: "center" });
-                doc.setFont("Helvetica", "bold");
-                doc.setFontSize(10);
-                doc.text(`Nominal: ${formatRupiah(tx.amount)}`, 8, 63);
-                doc.setFontSize(8);
-                doc.setFont("Helvetica", "normal");
-                doc.text(`Saldo Akhir: ${formatRupiah(tx.finalBalance)}`, 8, 69);
-
-                doc.text("-------------------------------------------------------------", 40, 75, { align: "center" });
-                doc.text("Terima kasih telah bertransaksi", 40, 81, { align: "center" });
-
-                doc.save(`Struk_${tx.id}_${tx.custId}.pdf`);
-
-                let phoneFormatted = String(tx.custPhone || '').trim();
-                if (phoneFormatted.startsWith('0')) phoneFormatted = '62' + phoneFormatted.slice(1);
-
-                const waMessage = encodeURIComponent(`Halo Bpk/Ibu *${tx.custName}* (${tx.custId}), berikut adalah bukti transaksi *${tx.type === 'SETOR' ? 'Setor Tunai' : 'Tarik Tunai'}* sebesar *${formatRupiah(tx.amount)}* (No. Ref: ${tx.id}). Saldo akhir rekening Anda: *${formatRupiah(tx.finalBalance)}*. File PDF struk terlampir.`);
-                window.open(`https://wa.me/${phoneFormatted}?text=${waMessage}`, '_blank');
-
-                showToast('PDF diunduh & WhatsApp dibuka!', 'success');
-                closeModal('receiptModal');
-            } catch (err) {
-                showToast('Gagal membuat PDF struk.', 'error');
-            }
-        }
-
-        function populateNasabahFilterDropdown() {
-            const select = document.getElementById('filterNasabah');
-            select.innerHTML = '<option value="ALL">Semua Nasabah</option>';
-            customers.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = `${c.id} - ${c.name}`;
-                select.appendChild(opt);
-            });
-        }
-
-        function renderFilteredMutasi() {
-            const custFilter = document.getElementById('filterNasabah').value;
-            const monthFilter = document.getElementById('filterBulan').value;
-            const yearFilter = document.getElementById('filterTahun').value;
-            const order = document.getElementById('sortOrder').value;
-
-            let filtered = mutasiData.filter(item => {
-                const matchCust = custFilter === 'ALL' || item.custId === custFilter;
-                const matchMonth = monthFilter === 'ALL' || item.month === monthFilter;
-                const matchYear = yearFilter === 'ALL' || item.year === yearFilter;
-                return matchCust && matchMonth && matchYear;
-            });
-
-            filtered.sort((a, b) => order === 'DESC' ? b.timestamp - a.timestamp : a.timestamp - b.timestamp);
-
-            const custLabel = custFilter === 'ALL' ? 'Semua Nasabah' : custFilter;
-            const monthLabel = monthFilter === 'ALL' ? 'Semua Bulan' : `Bulan ${monthFilter}`;
-            const yearLabel = yearFilter === 'ALL' ? 'Semua Tahun' : yearFilter;
-            document.getElementById('printSubtitle').textContent = `Periode: ${monthLabel} ${yearLabel} • Nasabah: ${custLabel}`;
-            document.getElementById('mutasiCountBadge').textContent = `${filtered.length} Transaksi`;
-
-            const listEl = document.getElementById('mutasiResultList');
-            listEl.innerHTML = '';
-
-            if (filtered.length === 0) {
-                listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Belum ada data mutasi pada periode ini.</p>`;
-                return;
-            }
-
-            filtered.forEach(tx => {
-                const isSetor = tx.type === 'SETOR';
-                const row = document.createElement('div');
-                row.className = 'flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800/80 text-xs';
-                row.innerHTML = `
-                    <div class="min-w-0 pr-2">
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-sky-400">${tx.custId}</span>
-                            <strong class="text-white truncate">${tx.custName}</strong>
-                        </div>
-                        <p class="text-[10px] text-slate-400 mt-1">${tx.date} • ${tx.note} (${tx.id})</p>
-                    </div>
-                    <span class="font-extrabold shrink-0 ${isSetor ? 'text-emerald-400' : 'text-rose-400'}">
-                        ${isSetor ? '+' : '-'}${formatRupiah(tx.amount)}
-                    </span>
-                `;
-                listEl.appendChild(row);
-            });
-        }
-
-        function printMutasiPDF() {
-            showToast('Menyiapkan dokumen PDF...', 'info');
-            setTimeout(() => { window.print(); }, 400);
-        }
-
-        function renderLiveCarousel() {
-            const container = document.getElementById('liveCarouselContainer');
-            if (!container) return;
-            if (broadcastSlides.length === 0) {
-                container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500">Belum ada banner broadcast di Google Sheets.</div>`;
-                return;
-            }
-            if (activeCarouselIdx >= broadcastSlides.length) activeCarouselIdx = 0;
-
-            const slide = broadcastSlides[activeCarouselIdx];
-            container.innerHTML = `
-                <div class="p-4 bg-gradient-to-r ${slide.theme} transition-all duration-500 animate-card">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="px-2 py-0.5 rounded bg-black/40 text-[9px] font-extrabold tracking-wider text-amber-300 uppercase">${slide.badge}</span>
-                        <span class="text-[10px] text-slate-300">${activeCarouselIdx + 1} / ${broadcastSlides.length}</span>
-                    </div>
-                    <h4 class="text-xs font-bold text-white">${slide.title}</h4>
-                    <p class="text-[11px] text-slate-300 mt-0.5">${slide.desc}</p>
-                </div>
-            `;
-        }
-
-        async function addBroadcastSlide(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSaveBroadcast');
-            btn.disabled = true;
-
-            const newSlide = {
-                id: 'BC-' + Date.now(),
-                badge: document.getElementById('bcBadge').value.trim().toUpperCase(),
-                title: document.getElementById('bcTitle').value.trim(),
-                desc: document.getElementById('bcDesc').value.trim(),
-                theme: document.getElementById('bcTheme').value
-            };
-
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'addBroadcast', data: newSlide })
-                });
-                await syncFromGoogleSheets();
-                renderBroadcastManager();
-                e.target.reset();
-                showToast('Broadcast tersimpan di Sheet!', 'success');
-            } catch (err) {
-                showToast('Gagal menyimpan broadcast.', 'error');
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        async function deleteBroadcastSlide(id) {
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'deleteBroadcast', id })
-                });
-                await syncFromGoogleSheets();
-                renderBroadcastManager();
-                showToast('Slide dihapus dari Sheet.', 'info');
-            } catch (err) {
-                showToast('Gagal menghapus slide.', 'error');
-            }
-        }
-
-        function renderBroadcastManager() {
-            const list = document.getElementById('broadcastManageList');
-            list.innerHTML = '';
-            if (broadcastSlides.length === 0) {
-                list.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Belum ada slide broadcast.</p>`;
-                return;
-            }
-            broadcastSlides.forEach(s => {
-                const item = document.createElement('div');
-                item.className = 'p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex justify-between items-center gap-3';
-                item.innerHTML = `
-                    <div class="min-w-0">
-                        <span class="text-[9px] font-bold text-amber-400 uppercase">${s.badge}</span>
-                        <h5 class="text-xs font-bold text-white truncate">${s.title}</h5>
-                        <p class="text-[10px] text-slate-400 truncate">${s.desc}</p>
-                    </div>
-                    <button onclick="deleteBroadcastSlide('${s.id}')" class="w-8 h-8 shrink-0 rounded-xl bg-rose-500/15 text-rose-400 hover:bg-rose-500 hover:text-white flex items-center justify-center transition">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        function renderCustomerDirectory() {
-            const container = document.getElementById('directoryListContainer');
-            container.innerHTML = '';
-            if (customers.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Belum ada nasabah di Google Sheets.</p>`;
-                return;
-            }
-            customers.forEach(c => {
-                const row = document.createElement('div');
-                row.onclick = () => {
-                    document.getElementById('inputCustomerId').value = c.id.replace('NSB-', '');
-                    lookupCustomer(c.id);
-                    closeModal('nasabahListModal');
-                    switchTab('transaksi');
-                };
-                row.className = 'cursor-pointer p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 flex justify-between items-center transition';
-                row.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 font-bold text-xs flex items-center justify-center">${c.avatar}</div>
-                        <div>
-                            <h4 class="text-xs font-bold text-white">${c.name}</h4>
-                            <p class="text-[10px] font-mono text-sky-400">${c.id} • WA: ${c.phone}</p>
-                        </div>
-                    </div>
-                    <strong class="text-xs font-extrabold text-emerald-400">${formatRupiah(c.balance)}</strong>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            const colors = {
-                success: 'bg-slate-900 border-emerald-500/60 text-emerald-300',
-                error: 'bg-slate-900 border-rose-500/60 text-rose-300',
-                warning: 'bg-slate-900 border-amber-500/60 text-amber-300',
-                info: 'bg-slate-900 border-sky-500/60 text-sky-300'
-            };
-            toast.className = `${colors[type]} border px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-medium backdrop-blur-md transition-all duration-300`;
-            toast.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedTeller = sessionStorage.getItem('tellerName');
-            if (savedTeller) document.getElementById('drawerTellerName').textContent = savedTeller;
-
-            syncFromGoogleSheets();
-            setInterval(() => {
-                if (broadcastSlides.length > 0) {
-                    activeCarouselIdx = (activeCarouselIdx + 1) % broadcastSlides.length;
-                    renderLiveCarousel();
-                }
-            }, 4500);
-        });
-    </script>
-</body>
+    <form onsubmit="handleAdminRegisterNasabah(event)" class="space-y-3">
+     <div>
+      <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Lengkap Nasabah</label>
+      <input type="text" id="adminRegName" required placeholder="Nama lengkap sesuai identitas" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+     </div>
+     <div>
+      <label class="block text-xs font-semibold text-slate-300 mb-1">Alamat Domisili</label>
+      <input type="text" id="adminRegAddress" required placeholder="Alamat lengkap tempat tinggal" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500">
+     </div>
+     <div>
+      <label class="block text-xs font-semibold text-slate-300 mb-1">No. Telepon / WhatsApp</label>
+      <input type="tel" id="adminRegPhone" required inputmode="numeric" placeholder="081234567890" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-orange-500">
+     </div>
+     <div>
+      <label class="block text-xs font-semibold text-slate-300 mb-1">PIN Transaksi (6 Digit)</label>
+      <input type="password" id="adminRegPin" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white tracking-[0.5em] text-center font-bold focus:outline-none focus:border-orange-500">
+     </div>
+     <button type="submit" id="adminRegSubmitBtn" class="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition shadow-lg shadow-orange-600/30">
+      Simpan & Terbitkan Rekening
+     </button>
+    </form>
+   </div>
+  </div>
+
+  <!-- MODAL SCANNER KAMERA ADMIN -->
+  <div id="adminScannerModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+   <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+    <div class="flex justify-between items-center">
+     <h3 class="font-bold text-sm text-white">Pindai QR Nasabah</h3>
+     <button onclick="closeAdminScanner()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+      <i class="fa-solid fa-xmark"></i>
+     </button>
+    </div>
+    <div class="relative bg-slate-950 border border-slate-800 rounded-2xl h-72 flex flex-col items-center justify-center overflow-hidden">
+     <div id="readerAdmin" class="w-full h-full"></div>
+    </div>
+    <span class="text-[10px] text-slate-400">Arahkan kamera ke QR Code Kartu Nasabah</span>
+   </div>
+  </div>
+
+  <!-- MODAL CEK KAS BANK -->
+  <div id="kasBankModal" class="fixed inset-0 bg-black/85 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+   <div class="bg-slate-900 border border-orange-500/40 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+    <div class="flex justify-between items-center">
+     <h3 class="font-bold text-sm text-white">Rekening Kas Pusat Bank</h3>
+     <button onclick="closeModal('kasBankModal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+      <i class="fa-solid fa-xmark"></i>
+     </button>
+    </div>
+    <div class="nasabah-mesh p-5 rounded-2xl border border-orange-500/30 space-y-2">
+     <span class="text-[10px] font-bold text-orange-300 uppercase tracking-wider">ID: NSB-BANK</span>
+     <h2 id="kasBankBalance" class="text-2xl font-extrabold text-white">Rp 0</h2>
+     <p class="text-[11px] text-slate-300 font-mono">No. Rek: 9999 0000 01</p>
+    </div>
+    <p class="text-[10px] text-slate-400">Menampung akumulasi pemeliharaan biaya administrasi bulanan (Kode 100).</p>
+   </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION ADMIN -->
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-slate-950/95 backdrop-blur-md border-t border-slate-800/90 py-2.5 px-6 flex justify-around items-center z-30">
+   <button onclick="switchAdminTab('dashboard')" id="nav-das" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
+    <i class="fa-solid fa-chart-pie text-base"></i>
+    <span class="text-[10px] mt-1 font-semibold">Statistik</span>
+   </button>
+   <button onclick="switchAdminTab('transaksi')" id="nav-tra" class="flex flex-col items-center text-orange-400 transition">
+    <i class="fa-solid fa-money-bill-transfer text-base"></i>
+    <span class="text-[10px] mt-1 font-semibold">Transaksi</span>
+   </button>
+   <button onclick="switchAdminTab('nasabah')" id="nav-nas" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
+    <i class="fa-solid fa-users text-base"></i>
+    <span class="text-[10px] mt-1 font-semibold">Nasabah</span>
+   </button>
+   <button onclick="switchAdminTab('broadcast')" id="nav-bro" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
+    <i class="fa-solid fa-bullhorn text-base"></i>
+    <span class="text-[10px] mt-1 font-semibold">Broadcast</span>
+   </button>
+   <button onclick="switchAdminTab('mutasi')" id="nav-mut" class="flex flex-col items-center text-slate-400 hover:text-orange-400 transition">
+    <i class="fa-solid fa-receipt text-base"></i>
+    <span class="text-[10px] mt-1 font-semibold">Mutasi</span>
+   </button>
+  </nav>
+
+ </div>
+
+ <style>
+  body { font-family: 'Inter', sans-serif; background-color: #020617; }
+  .nasabah-mesh { background-image: radial-gradient(at 85% 15%, rgba(249, 115, 22, 0.28) 0px, transparent 55%, linear-gradient(135deg, #0f172a 0%, #29150b 50%, #431407 100%); }
+  #readerAdmin { width: 100% !important; height: 100% !important; border: none !important; }
+  #readerAdmin video { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 1rem; }
+  #readerAdmin__dashboard_section_csr { display: none !important; }
+ </style>
+
+ <script>
+  // Validasi Sesi Admin (Terisolasi)
+  const sessionAdmin = sessionStorage.getItem('nusa_admin_session');
+  if (!sessionAdmin) {
+      window.location.href = 'admin-login.html';
+  }
+
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu0kGhiGxqD1wH5MeqWxIDMfep_SsTLYkpYMnjwzGJNu2kUPAW8T83SL2C1t52CH9r/exec";
+  let adminDataNasabah = [];
+  let adminDataMutasi = [];
+  let kasBankInfo = { balance: 0 };
+  let html5QrCodeAdmin = null;
+  let selectedValidNasabahId = null;
+
+  function toggleDrawer(show) {
+   const drawer = document.getElementById('navDrawer');
+   const backdrop = document.getElementById('drawerBackdrop');
+   if (show) {
+    backdrop.classList.remove('hidden');
+    setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+    drawer.classList.remove('-translate-x-full');
+   } else {
+    drawer.classList.add('-translate-x-full');
+    backdrop.classList.add('opacity-0');
+    setTimeout(() => backdrop.classList.add('hidden'), 300);
+   }
+  }
+
+  function switchAdminTab(tab) {
+   ['dashboard', 'transaksi', 'nasabah', 'broadcast', 'mutasi'].forEach(t => {
+    const el = document.getElementById('admin-' + t);
+    if (el) el.classList.add('hidden');
+    const navEl = document.getElementById('nav-' + t.slice(0,3));
+    if (navEl) navEl.className = 'flex flex-col items-center text-slate-400 hover:text-orange-400 transition';
+   });
+   const target = document.getElementById('admin-' + tab);
+   if (target) target.classList.remove('hidden');
+   const activeNav = document.getElementById('nav-' + tab.slice(0,3));
+   if (activeNav) activeNav.className = 'flex flex-col items-center text-orange-400 transition';
+  }
+
+  function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  function openKasBankModal() { openModal('kasBankModal'); }
+
+  function formatRupiah(num) {
+   return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+  }
+
+  function normalizeCustomerId(rawInput) {
+   let clean = String(rawInput || '').trim().toUpperCase();
+   if (clean.startsWith('NSB-')) clean = clean.replace('NSB-', '');
+   return clean ? 'NSB-' + clean : '';
+  }
+
+  function lookupAdminNasabah(val) {
+   const cleanVal = val.trim().toUpperCase();
+   const previewBox = document.getElementById('adminNasabahPreviewBox');
+   selectedValidNasabahId = null;
+
+   if (!cleanVal) {
+    previewBox.classList.add('hidden');
+    return;
+   }
+
+   let fullId = normalizeCustomerId(cleanVal);
+   const found = adminDataNasabah.find(n => {
+    const dbId = String(n.ID_Nasabah || '').trim().toUpperCase();
+    const dbAcc = String(n.No_Rekening || '').trim().toUpperCase();
+    return dbId === fullId || dbId === cleanVal || dbAcc.includes(cleanVal);
+   });
+
+   if (found) {
+    selectedValidNasabahId = found.ID_Nasabah;
+    document.getElementById('previewNama').textContent = found.Nama;
+    document.getElementById('previewAlamat').textContent = found.Alamat || '-';
+    document.getElementById('previewSaldo').textContent = formatRupiah(found.Saldo);
+    previewBox.classList.remove('hidden');
+   } else {
+    previewBox.classList.add('hidden');
+   }
+  }
+
+  function openAdminScanner() {
+   openModal('adminScannerModal');
+   if (!html5QrCodeAdmin) {
+    html5QrCodeAdmin = new Html5Qrcode("readerAdmin");
+   }
+   html5QrCodeAdmin.start(
+    { facingMode: "environment" }, 
+    { fps: 10, qrbox: { width: 240, height: 240 } },
+    (decodedText) => {
+     let clean = decodedText.trim();
+     if (clean.includes('NSB-')) clean = clean.split('NSB-')[1];
+     document.getElementById('adminTxNasabahInput').value = 'NSB-' + clean;
+     lookupAdminNasabah('NSB-' + clean);
+     closeAdminScanner();
+    },
+    (err) => {}
+   ).catch(err => alert('Gagal membuka kamera.'));
+  }
+
+  function closeAdminScanner() {
+   if (html5QrCodeAdmin && html5QrCodeAdmin.isScanning) {
+    html5QrCodeAdmin.stop().then(() => closeModal('adminScannerModal')).catch(() => closeModal('adminScannerModal'));
+   } else {
+    closeModal('adminScannerModal');
+   }
+  }
+
+  function updateBroadcastPreview() {
+   const title = document.getElementById('bcTitle').value || 'Judul Pengumuman';
+   const badge = document.getElementById('bcBadge').value || 'INFO';
+   const desc = document.getElementById('bcDesc').value || 'Deskripsi isi pesan broadcast akan tampil di sini...';
+   const theme = document.getElementById('bcTheme').value;
+
+   const btn1L = document.getElementById('bcBtn1Label').value;
+   const btn2L = document.getElementById('bcBtn2Label').value;
+   const btn3L = document.getElementById('bcBtn3Label').value;
+
+   let buttonsHTML = '';
+   let activeButtonsCount = 0;
+
+   if (btn1L) activeButtonsCount++;
+   if (btn2L) activeButtonsCount++;
+   if (btn3L) activeButtonsCount++;
+
+   if (activeButtonsCount > 0) {
+    buttonsHTML += `<div class="grid grid-cols-${activeButtonsCount} gap-2 mt-3">`;
+    if (btn1L) buttonsHTML += `<div class="py-2 px-3 rounded-xl bg-orange-600 text-white font-bold text-[10px] text-center truncate">${btn1L}</div>`;
+    if (btn2L) buttonsHTML += `<div class="py-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-[10px] text-center truncate">${btn2L}</div>`;
+    if (btn3L) buttonsHTML += `<div class="py-2 px-3 rounded-xl bg-sky-600 text-white font-bold text-[10px] text-center truncate">${btn3L}</div>`;
+    buttonsHTML += `</div>`;
+   }
+
+   const container = document.getElementById('broadcastLivePreviewContainer');
+   container.innerHTML = `
+    <div class="p-4 bg-gradient-to-br ${theme} border rounded-2xl shadow-lg space-y-2">
+     <div class="flex justify-between items-center">
+      <span class="px-2 py-0.5 rounded bg-black/50 text-[9px] font-extrabold text-orange-300 uppercase border border-orange-400/30">${badge}</span>
+     </div>
+     <div>
+      <h4 class="text-sm font-extrabold text-white leading-tight">${title}</h4>
+      <p class="text-[11px] text-slate-300 mt-1">${desc}</p>
+     </div>
+     ${buttonsHTML}
+    </div>
+   `;
+  }
+
+  async function fetchAdminData() {
+   try {
+    const res = await fetch(`${SCRIPT_URL}?action=getAllData`);
+    const result = await res.json();
+    if (result.status === 'success') {
+     adminDataNasabah = result.nasabah || [];
+     adminDataMutasi = result.mutasi || [];
+     
+     const bankAccount = adminDataNasabah.find(n => String(n.ID_Nasabah) === 'NSB-BANK');
+     if (bankAccount) {
+      kasBankInfo.balance = Number(bankAccount.Saldo || 0);
+      document.getElementById('kasBankBalance').textContent = formatRupiah(kasBankInfo.balance);
+     }
+
+     const wargaList = adminDataNasabah.filter(n => String(n.ID_Nasabah) !== 'NSB-BANK');
+     const totalSaldoWarga = wargaList.reduce((acc, curr) => acc + Number(curr.Saldo || 0), 0);
+
+     document.getElementById('statTotalNasabah').textContent = wargaList.length;
+     document.getElementById('statTotalSaldo').textContent = formatRupiah(totalSaldoWarga);
+
+     renderAdminNasabah(wargaList);
+     renderAdminMutasi(adminDataMutasi);
+     updateBroadcastPreview();
+    }
+   } catch(e) {}
+
+   // Ambil pengaturan nominal potongan
+   try {
+    const setRes = await fetch(`${SCRIPT_URL}?action=getSettings`);
+    const setResult = await setRes.json();
+    if (setResult.status === 'success' && setResult.nominalPotongan) {
+     document.getElementById('settingNominalPotongan').value = setResult.nominalPotongan;
+    }
+   } catch(e) {}
+  }
+
+  async function handleSaveSetting(e) {
+   e.preventDefault();
+   const nominal = document.getElementById('settingNominalPotongan').value;
+   const btn = document.getElementById('btnSaveSetting');
+   btn.disabled = true;
+   btn.textContent = 'Menyimpan...';
+
+   try {
+    const res = await fetch(SCRIPT_URL, {
+     method: 'POST',
+     body: JSON.stringify({ action: 'saveSettings', data: { nominalPotongan: nominal } })
+    });
+    const result = await res.json();
+    if (result.status === 'success') {
+     alert('Pengaturan nominal potongan bulanan berhasil diperbarui!');
+    } else {
+     alert('Gagal menyimpan pengaturan.');
+    }
+   } catch(e) {
+    alert('Kesalahan jaringan.');
+   } finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan Pengaturan Potongan';
+   }
+  }
+
+  async function handleAdminTransactionSubmit(e) {
+   e.preventDefault();
+   if (!selectedValidNasabahId) {
+    alert('Pilih atau ketik ID/No. Rekening Nasabah yang valid terlebih dahulu!');
+    return;
+   }
+
+   const jenis = document.getElementById('adminTxType').value;
+   const nominal = Number(document.getElementById('adminTxAmount').value);
+   const keterangan = document.getElementById('adminTxNote').value.trim() || (jenis === 'SETOR' ? 'Setor Tunai Teller' : 'Tarik Tunai Teller');
+
+   const now = new Date();
+   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+   const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+   const refCode = 'ADM-' + Date.now().toString().slice(-8);
+
+   const payload = {
+    action: 'adminTransaction',
+    data: { nasabahId: selectedValidNasabahId, jenis: jenis === 'SETOR' ? 'SETOR-011' : 'TARIK-011', nominal, refCode, dateStr, keterangan, timestamp: Math.floor(Date.now() / 1000) }
+   };
+
+   try {
+    const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+    const result = await res.json();
+    if (result.status === 'success') {
+     alert('Transaksi teller berhasil diproses!');
+     e.target.reset();
+     document.getElementById('adminNasabahPreviewBox').classList.add('hidden');
+     selectedValidNasabahId = null;
+     fetchAdminData();
+    } else {
+     alert(result.message || 'Transaksi gagal.');
+    }
+   } catch(err) {
+    alert('Terjadi kesalahan jaringan.');
+   }
+  }
+
+  async function handleAdminRegisterNasabah(e) {
+   e.preventDefault();
+   const name = document.getElementById('adminRegName').value.trim();
+   const address = document.getElementById('adminRegAddress').value.trim();
+   const phone = document.getElementById('adminRegPhone').value.trim();
+   const pin = document.getElementById('adminRegPin').value.trim();
+   const btn = document.getElementById('adminRegSubmitBtn');
+
+   btn.disabled = true;
+   btn.textContent = 'Membuat Rekening...';
+
+   try {
+    const wargaList = adminDataNasabah.filter(n => String(n.ID_Nasabah).startsWith('NSB-'));
+    const newId = 'NSB-' + String(wargaList.length + 1).padStart(3, '0');
+    const newAcc = '8801 ' + Math.floor(1000 + Math.random() * 9000) + ' ' + Math.floor(10 + Math.random() * 90);
+
+    const now = new Date();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+    const payloadData = {
+     id: newId, name, address, phone, pin, acc: newAcc, balance: 0,
+     dateStr, month: String(now.getMonth() + 1).padStart(2, '0'),
+     year: String(now.getFullYear()), timestamp: Math.floor(Date.now() / 1000), refCode: 'REG-' + Date.now().toString().slice(-8)
+    };
+
+    const res = await fetch(SCRIPT_URL, {
+     method: 'POST',
+     body: JSON.stringify({ action: 'registerNasabah', data: payloadData })
+    });
+    const result = await res.json();
+
+    if (result.status === 'success') {
+     alert(`Berhasil mendaftarkan nasabah baru!\nID: ${newId}\nNo. Rek: ${newAcc}`);
+     closeModal('addNasabahModal');
+     e.target.reset();
+     fetchAdminData();
+    } else {
+     alert(result.message || 'Gagal mendaftarkan nasabah.');
+    }
+   } catch (err) {
+    alert('Terjadi kesalahan jaringan.');
+   } finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan & Terbitkan Rekening';
+   }
+  }
+
+  async function handleBroadcastSubmit(e) {
+   e.preventDefault();
+   const title = document.getElementById('bcTitle').value.trim();
+   const badge = document.getElementById('bcBadge').value.trim();
+   const desc = document.getElementById('bcDesc').value.trim();
+   const theme = document.getElementById('bcTheme').value;
+
+   const btn1L = document.getElementById('bcBtn1Label').value.trim();
+   const btn1U = document.getElementById('bcBtn1Url').value.trim();
+   const btn2L = document.getElementById('bcBtn2Label').value.trim();
+   const btn2U = document.getElementById('bcBtn2Url').value.trim();
+   const btn3L = document.getElementById('bcBtn3Label').value.trim();
+   const btn3U = document.getElementById('bcBtn3Url').value.trim();
+
+   const payload = {
+    action: 'saveBroadcast',
+    data: {
+     id: 'BC-' + Date.now().toString().slice(-6),
+     badge, title, desc, theme,
+     btn1Label: btn1L, btn1Url: btn1U,
+     btn2Label: btn2L, btn2Url: btn2U,
+     btn3Label: btn3L, btn3Url: btn3U
+    }
+   };
+
+   try {
+    const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+    const result = await res.json();
+    if (result.status === 'success') {
+     alert('Broadcast iklan dengan multi-tombol berhasil dipublikasikan!');
+     e.target.reset();
+     updateBroadcastPreview();
+    } else {
+     alert('Gagal mempublikasikan broadcast.');
+    }
+   } catch(e) {
+    alert('Gagal terhubung ke server.');
+   }
+  }
+
+  function renderAdminNasabah(list) {
+   const container = document.getElementById('adminNasabahList');
+   if(!container) return;
+   container.innerHTML = '';
+   list.forEach(n => {
+    const div = document.createElement('div');
+    div.className = 'p-3.5 bg-slate-950 border border-slate-800 rounded-2xl flex justify-between items-center text-xs';
+    div.innerHTML = `
+     <div>
+      <h4 class="font-bold text-white">${n.Nama}</h4>
+      <p class="text-[10px] text-orange-400 font-mono">${n.ID_Nasabah} • ${n.No_Rekening}</p>
+     </div>
+     <div class="text-right">
+      <span class="font-extrabold text-orange-400 block">${formatRupiah(n.Saldo)}</span>
+     </div>
+    `;
+    container.appendChild(div);
+   });
+  }
+
+  function renderAdminMutasi(list) {
+   const container = document.getElementById('adminMutasiList');
+   if(!container) return;
+   container.innerHTML = '';
+   list.forEach(tx => {
+    const div = document.createElement('div');
+    div.className = 'p-3 bg-slate-950 border border-slate-800 rounded-2xl flex justify-between items-center text-xs';
+    div.innerHTML = `
+     <div>
+      <h4 class="font-bold text-white">${tx.Keterangan || tx.Jenis}</h4>
+      <p class="text-[10px] text-slate-400">${tx.Nama_Nasabah} (${tx.ID_Nasabah}) • ${tx.Tanggal}</p>
+     </div>
+     <span class="font-mono font-bold text-orange-400">${formatRupiah(tx.Nominal)}</span>
+    `;
+    container.appendChild(div);
+   });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+   fetchAdminData();
+   switchAdminTab('transaksi');
+  });
+ </script>
 </html>
