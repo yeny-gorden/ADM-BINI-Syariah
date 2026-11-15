@@ -1,7 +1,7 @@
 {
   "name": "BINI Syariah Admin Panel",
-  "short_name": "Admin",
-  "start_url": "./idex.html",
+  "short_name": "Admin Bini",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#020617",
