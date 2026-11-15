@@ -1,27 +1,27 @@
-const CACHE_NAME = 'bini-syariah-v1';
-const assetsToCache = [
+const CACHE_NAME = 'bini-syariah-admin-v1';
+const urlsToCache = [
   './index.html',
   './admin.html'
 ];
 
-// Install Service Worker dan Cache File Utama
+// Install Service Worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(assetsToCache);
+      return cache.addAll(urlsToCache);
     })
   );
   self.skipWaiting();
 });
 
-// Aktivasi Service Worker
+// Activate & Cleanup old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
           }
         })
       );
@@ -30,16 +30,11 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Intersep Fetch Request
+// Fetch Strategy (Network First, fallback to cache)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request).catch(() => {
-        // Fallback jika offline total dan halaman tidak ada di cache
-        if (event.request.headers.get('accept').includes('text/html')) {
-          return caches.match('./index.html');
-        }
-      });
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
     })
   );
 });
