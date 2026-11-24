@@ -3,89 +3,2153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - BINI Syariah</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Konfigurasi PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#059669">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Tabungan Warga - Digital Banking</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; justify-content: center; align-items: center; padding: 10px; }
+
+        .app-container {
+            width: 100%; max-width: 460px; height: 95vh; max-height: 800px;
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+            display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px; background: var(--bg); border-bottom: 1px solid var(--border);
+        }
+        .header h1 { font-size: 1.1rem; font-weight: 700; }
+        .btn-sm { background: var(--border); color: var(--text); border: none; padding: 6px 11px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-logout { background: #7f1d1d; }
+        .btn-reset { background: #92400e; }
+
+        .body { flex: 1; padding: 18px; overflow-y: auto; }
+        .section { display: none; flex-direction: column; gap: 13px; }
+        .section.active { display: flex; }
+
+        /* Form & Inputs */
+        .tabs { display: flex; background: var(--bg); padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--muted); font-weight: 600; border-radius: 8px; cursor: pointer; }
+        .tab-btn.active { background: var(--primary); color: #fff; }
+
+        .field { display: flex; flex-direction: column; gap: 6px; position: relative; }
+        .field label { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+        .field input, .field select {
+            width: 100%; padding: 11px 13px; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); border-radius: 10px; font-size: 0.95rem; outline: none;
+        }
+        .field input:focus, .field select:focus { border-color: var(--primary); }
+        .nominal-input { font-size: 1.1rem !important; font-weight: 700; letter-spacing: 0.3px; }
+        .source-hint { font-size: 0.78rem; color: #93c5fd; margin-top: 2px; }
+
+        .input-row { display: flex; gap: 8px; }
+        .btn-icon { background: var(--primary); border: none; color: #fff; padding: 0 15px; border-radius: 10px; font-size: 1.2rem; cursor: pointer; }
+        .btn-clear {
+            background: var(--border); border: none; color: var(--muted); padding: 0 13px;
+            border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+        }
+        .btn-clear:hover { color: #fff; background: #475569; }
+
+        .suggestions {
+            position: absolute; top: 100%; left: 0; right: 0; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 8px; max-height: 150px; overflow-y: auto; z-index: 50; display: none;
+        }
+        .suggestion-item { padding: 10px 14px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .suggestion-item:hover { background: rgba(37, 99, 235, 0.2); }
+
+        .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 4px; }
+        .quick-btn {
+            background: var(--border); border: 1px solid transparent; color: #fff;
+            padding: 9px 4px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+        }
+        .quick-btn:active { background: var(--primary); border-color: #93c5fd; }
+
+        .btn-primary {
+            width: 100%; padding: 13px; background: var(--primary); color: #fff; border: none;
+            border-radius: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 4px;
+        }
+        .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+        .btn-success { background: var(--success); }
+        .btn-warning { background: var(--warning); }
+
+        /* Dashboard & Cards */
+        .balance-card {
+            background: linear-gradient(135deg, #1d4ed8, #2563eb); padding: 20px; border-radius: 16px;
+            cursor: pointer; user-select: none; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+        }
+        .balance-card small { font-size: 0.8rem; opacity: 0.85; display: block; }
+        .balance-card h2 { font-size: 1.85rem; margin: 6px 0; letter-spacing: 0.5px; }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .menu-btn {
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            padding: 15px 12px; border-radius: 12px; font-size: 0.88rem; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer;
+        }
+        .menu-btn:hover { border-color: var(--primary); }
+        .menu-btn span { font-size: 1.45rem; }
+
+        /* Filter & Lists */
+        .filter-panel {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .filter-panel select {
+            width: 100%; padding: 8px 10px; background: var(--card); border: 1px solid var(--border);
+            color: var(--text); border-radius: 8px; font-size: 0.82rem; outline: none;
+        }
+
+        .summary-strip {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+        }
+        .summary-box {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+            padding: 10px; font-size: 0.78rem;
+        }
+        .summary-box span { color: var(--muted); display: block; margin-bottom: 3px; }
+        .summary-box strong { font-size: 0.92rem; }
+
+        .list-box { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; max-height: 260px; overflow-y: auto; }
+        .list-item { padding: 11px 13px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.86rem; gap: 8px; }
+        .list-item:last-child { border-bottom: none; }
+        .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+        .otp-badge {
+            display: inline-block; background: rgba(37, 99, 235, 0.2); border: 1px solid var(--primary);
+            color: #93c5fd; padding: 6px 12px; border-radius: 8px; font-family: monospace;
+            font-size: 1.1rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px;
+        }
+
+        /* QR & Scanner */
+        #qr-reader { width: 240px; height: 240px; margin: 0 auto; border-radius: 14px; overflow: hidden; border: 2px solid var(--primary); background: #000; }
+        .qr-box { background: var(--bg); padding: 20px; border-radius: 14px; text-align: center; border: 1px solid var(--border); }
+        #qrcode { background: #fff; padding: 12px; border-radius: 10px; display: inline-block; margin: 12px 0; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.82); display: none;
+            justify-content: center; align-items: center; padding: 16px; z-index: 100;
+        }
+        .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 390px; padding: 20px; text-align: center; max-height: 90vh; overflow-y: auto; }
+        .modal-box h3 { margin-bottom: 8px; }
+        .modal-box p { color: var(--muted); font-size: 0.88rem; margin-bottom: 14px; line-height: 1.4; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+        .receipt { background: #fff; color: #0f172a; padding: 15px; border-radius: 10px; text-align: left; font-family: monospace; font-size: 0.8rem; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 5px; gap: 8px; }
+        #statusBar { text-align: center; font-size: 0.78rem; color: var(--muted); padding: 6px; min-height: 24px; }
+
+        /* Printable Statement / Report / Receipt Layout */
+        #printableStatementContainer {
+            display: none;
+            background: #ffffff;
+            color: #0f172a;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .print-header { border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .print-header h2 { font-size: 18px; margin-bottom: 3px; }
+        .print-meta { font-size: 12px; color: #334155; margin-bottom: 14px; line-height: 1.5; }
+        .print-summary { display: flex; gap: 12px; margin-bottom: 16px; }
+        .print-sum-card { flex: 1; border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; font-size: 12px; }
+        .print-sum-card strong { display: block; font-size: 14px; margin-top: 4px; }
+        .print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 7px 8px; text-align: left; }
+        .print-table th { background: #f1f5f9; font-weight: 700; }
+        .print-table td.num, .print-table th.num { text-align: right; }
+        .print-footer { margin-top: 18px; font-size: 11px; color: #475569; display: flex; justify-content: space-between; }
+
+        .print-receipt-wrap {
+            max-width: 540px;
+            margin: 0 auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 24px;
+            background: #ffffff;
+            color: #0f172a;
+        }
+        .print-receipt-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+        }
+        .print-receipt-brand h2 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            margin-bottom: 3px;
+        }
+        .print-receipt-brand p {
+            font-size: 11px;
+            color: #475569;
+        }
+        .print-receipt-badge {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .print-receipt-amount-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .print-receipt-amount-box span {
+            font-size: 12px;
+            color: #475569;
+            font-weight: 600;
+        }
+        .print-receipt-amount-box strong {
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 800;
+        }
+        .print-receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-bottom: 18px;
+        }
+        .print-receipt-table td {
+            padding: 8px 4px;
+            border-bottom: 1px dashed #cbd5e1;
+            vertical-align: top;
+        }
+        .print-receipt-table td.label {
+            color: #475569;
+            width: 36%;
+        }
+        .print-receipt-table td.val {
+            color: #0f172a;
+            font-weight: 600;
+            text-align: right;
+        }
+        .print-receipt-table tr:last-child td {
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 12px;
+        }
+        .print-receipt-foot {
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 12mm 10mm 12mm 10mm;
+        }
+
+        @media print {
+            html, body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                height: auto !important;
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                overflow: visible !important;
+            }
+            .app-container, .modal-overlay, #statusBar {
+                display: none !important;
+            }
+            #printableStatementContainer {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            .print-table th, .print-table td {
+                border-color: #cbd5e1 !important;
+            }
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans px-4 py-8">
-  <div class="max-w-md w-full mx-auto space-y-6 my-auto">
-    <div class="text-center space-y-3">
-      <div class="w-20 h-20 bg-orange-500/20 text-orange-400 rounded-3xl flex items-center justify-center mx-auto text-3xl border-2 border-orange-500/40 shadow-xl">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <h1 class="text-2xl font-black tracking-tight text-white">LOGIN ADMIN / TELLER</h1>
-      <p class="text-sm text-orange-300 font-medium">Sistem Keuangan Resmi BINI Syariah</p>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button class="btn-sm" id="backBtn" style="display:none;" onclick="navigate('home')">⬅ Kembali</button>
+            <h1 id="pageTitle">Tabungan Warga</h1>
+        </div>
+        <button class="btn-sm btn-logout" id="logoutBtn" style="display:none;" onclick="logout()">Keluar</button>
     </div>
 
-    <form onsubmit="handleAdminLogin(event)" class="space-y-4 bg-slate-900 border-2 border-slate-800 p-6 rounded-3xl shadow-2xl">
-      <div>
-        <label class="block text-sm font-bold text-slate-200 mb-2">ID Admin atau Nama</label>
-        <input type="text" id="adminUser" required placeholder="Contoh: ADM-01" class="w-full bg-slate-950 border-2 border-slate-700 focus:border-orange-500 rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none uppercase font-mono">
-      </div>
-      <div>
-        <label class="block text-sm font-bold text-slate-200 mb-2">PIN Admin</label>
-        <input type="password" id="adminPin" required placeholder="••••••" class="w-full bg-slate-950 border-2 border-slate-700 focus:border-orange-500 rounded-2xl px-4 py-3.5 text-base text-white tracking-[0.5em] text-center font-bold focus:outline-none">
-      </div>
-      <div id="loginStatus" class="text-xs text-center font-bold min-h-[20px]"></div>
-      <button type="submit" id="btnLogin" class="w-full py-4 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-black text-base shadow-xl shadow-orange-600/30 transition">
-        Masuk Panel Admin
-      </button>
-    </form>
-  </div>
+    <div class="body">
+        <!-- 1. AUTH (LOGIN / REGISTER) -->
+        <div id="authSection" class="section active">
+            <div class="tabs">
+                <button class="tab-btn active" id="tabLogin" onclick="setAuthMode('login')">Masuk</button>
+                <button class="tab-btn" id="tabRegister" onclick="setAuthMode('register')">Buka Rekening</button>
+            </div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5jTLvsc9nKsVikolWzQk1n9mUCFKNOCu0Evzwt4R3gN5528jVPEiwU2JyrmjTs2xd/exec";
+            <div class="field" id="nameField" style="display:none;">
+                <label>Nama Lengkap Sesuai Identitas</label>
+                <input type="text" id="regName" placeholder="Masukkan nama lengkap">
+            </div>
 
-    async function handleAdminLogin(e) {
-      e.preventDefault();
-      const user = document.getElementById('adminUser').value.trim();
-      const pin = document.getElementById('adminPin').value.trim();
-      const statusEl = document.getElementById('loginStatus');
-      const btn = document.getElementById('btnLogin');
+            <div class="field">
+                <label>Nomor HP (Nomor Rekening)</label>
+                <input type="tel" id="authHp" placeholder="Contoh: 08123456789">
+            </div>
 
-      btn.disabled = true;
-      btn.textContent = 'Memverifikasi...';
-      statusEl.textContent = '';
+            <div class="field">
+                <label id="pinLabel">PIN Keamanan (6 Digit)</label>
+                <input type="password" inputmode="numeric" maxlength="6" id="authPin" placeholder="••••••">
+            </div>
 
-      try {
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'loginAdmin', data: { user, pin } })
-        });
-        const result = await res.json();
-        if (result.status === 'success') {
-          localStorage.setItem('currentAdmin', JSON.stringify(result.admin));
-          window.location.href = 'admin.html';
-        } else {
-          statusEl.textContent = result.message || 'ID atau PIN Admin salah!';
-          statusEl.className = 'text-xs text-center text-red-400 font-bold';
+            <button class="btn-primary" id="authSubmitBtn" onclick="submitAuth()">Masuk</button>
+        </div>
+
+        <!-- 2. DASHBOARD -->
+        <div id="homeSection" class="section">
+            <div class="balance-card" onclick="toggleBalance()">
+                <small id="accInfo">Rekening: -</small>
+                <h2 id="balanceText">Rp ••••••••</h2>
+                <small id="balanceHint">Ketuk untuk menampilkan saldo</small>
+            </div>
+
+            <div class="menu-grid">
+                <button class="menu-btn" onclick="navigate('transfer')"><span>💸</span>Transfer</button>
+                <button class="menu-btn" onclick="openScanner('transfer')"><span>📷</span>Scan QR</button>
+                <button class="menu-btn" onclick="navigate('myqr')"><span>🆔</span>QR Rekening</button>
+                <button class="menu-btn" onclick="navigate('mutasi')"><span>📜</span>Mutasi & PDF</button>
+                <button class="menu-btn" id="btnWargaTarik" onclick="infoTarikTunai()"><span>💵</span>Tarik Tunai</button>
+
+                <!-- Menu Khusus Teller / Admin -->
+                <button class="menu-btn admin-only" style="display:none; border-color:var(--success);" onclick="navigate('setorAdmin')"><span>📥</span>Setor Tunai</button>
+                <button class="menu-btn admin-only" style="display:none; border-color:var(--warning);" onclick="navigate('tarikAdmin')"><span>📤</span>Tarik Tunai</button>
+                <button class="menu-btn admin-only" style="display:none;" onclick="navigate('rekapAdmin')"><span>📑</span>Rekap Saldo</button>
+                <button class="menu-btn admin-only" style="display:none;" onclick="navigate('kelolaAdmin')"><span>👥</span>Data Nasabah</button>
+            </div>
+        </div>
+
+        <!-- 3. TRANSFER -->
+        <div id="transferSection" class="section">
+            <div class="field" id="adminSourceField" style="display:none;">
+                <label>Sumber Rekening (Nasabah Pengirim / Rekening Admin)</label>
+                <input type="text" id="tfSource" placeholder="Kosongkan untuk akun admin, atau cari nasabah pengirim..." oninput="searchSourceMember(this.value)">
+                <div class="suggestions" id="tfSourceSuggest"></div>
+                <small class="source-hint" id="tfSourceInfo">Sumber: Rekening Admin sendiri (validasi PIN Admin)</small>
+            </div>
+
+            <div class="field">
+                <label>Rekening Tujuan (No HP / Nama)</label>
+                <div class="input-row">
+                    <input type="text" id="tfTarget" placeholder="Cari nama atau nomor HP..." oninput="searchMember(this.value, 'tfSuggest', 'tfTarget', (hp) => selectedTfHp = hp)">
+                    <button class="btn-icon" onclick="openScanner('transfer')">📷</button>
+                </div>
+                <div class="suggestions" id="tfSuggest"></div>
+            </div>
+            <div class="field">
+                <label>Nominal Transfer (Rp) — ketik langsung atau ketuk nominal</label>
+                <div class="input-row">
+                    <input type="text" inputmode="numeric" id="tfAmount" class="nominal-input" placeholder="0" oninput="formatNominalInput(this)">
+                    <button type="button" class="btn-clear" onclick="clearNominal('tfAmount')">Reset</button>
+                </div>
+                <div class="quick-grid">
+                    <button type="button" class="quick-btn" onclick="addNominal('tfAmount', 5000)">+5rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tfAmount', 10000)">+10rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tfAmount', 25000)">+25rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tfAmount', 50000)">+50rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tfAmount', 100000)">+100rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tfAmount', 500000)">+500rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tfAmount', 1000000)">+1jt</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tfAmount', 5000000)">+5jt</button>
+                </div>
+            </div>
+            <button class="btn-primary btn-success" id="btnTfPrompt" onclick="promptTransferPin()">Lanjutkan Transfer</button>
+        </div>
+
+        <!-- 4. SETOR TUNAI (ADMIN) -->
+        <div id="setorAdminSection" class="section">
+            <div class="field">
+                <label>Nasabah Tujuan (No HP / Nama)</label>
+                <div class="input-row">
+                    <input type="text" id="setorTarget" placeholder="Cari nasabah..." oninput="searchMember(this.value, 'setorSuggest', 'setorTarget', (hp) => selectedSetorHp = hp)">
+                    <button class="btn-icon" onclick="openScanner('setor')">📷</button>
+                </div>
+                <div class="suggestions" id="setorSuggest"></div>
+            </div>
+            <div class="field">
+                <label>Nominal Setoran (Rp) — ketik langsung atau ketuk nominal</label>
+                <div class="input-row">
+                    <input type="text" inputmode="numeric" id="setorAmount" class="nominal-input" placeholder="0" oninput="formatNominalInput(this)">
+                    <button type="button" class="btn-clear" onclick="clearNominal('setorAmount')">Reset</button>
+                </div>
+                <div class="quick-grid">
+                    <button type="button" class="quick-btn" onclick="addNominal('setorAmount', 5000)">+5rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('setorAmount', 10000)">+10rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('setorAmount', 25000)">+25rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('setorAmount', 50000)">+50rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('setorAmount', 100000)">+100rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('setorAmount', 500000)">+500rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('setorAmount', 1000000)">+1jt</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('setorAmount', 5000000)">+5jt</button>
+                </div>
+            </div>
+            <button class="btn-primary btn-success" id="btnSetorExec" onclick="executeSetor()">Proses Setor Tunai</button>
+        </div>
+
+        <!-- 5. TARIK TUNAI (ADMIN) -->
+        <div id="tarikAdminSection" class="section">
+            <div class="field">
+                <label>Nasabah Penarik (No HP / Nama)</label>
+                <input type="text" id="tarikTarget" placeholder="Cari nasabah..." oninput="searchMember(this.value, 'tarikSuggest', 'tarikTarget', (hp) => selectedTarikHp = hp)">
+                <div class="suggestions" id="tarikSuggest"></div>
+            </div>
+            <div class="field">
+                <label>Nominal Penarikan (Rp) — ketik langsung atau ketuk nominal</label>
+                <div class="input-row">
+                    <input type="text" inputmode="numeric" id="tarikAmount" class="nominal-input" placeholder="0" oninput="formatNominalInput(this)">
+                    <button type="button" class="btn-clear" onclick="clearNominal('tarikAmount')">Reset</button>
+                </div>
+                <div class="quick-grid">
+                    <button type="button" class="quick-btn" onclick="addNominal('tarikAmount', 5000)">+5rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tarikAmount', 10000)">+10rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tarikAmount', 25000)">+25rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tarikAmount', 50000)">+50rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tarikAmount', 100000)">+100rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tarikAmount', 500000)">+500rb</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tarikAmount', 1000000)">+1jt</button>
+                    <button type="button" class="quick-btn" onclick="addNominal('tarikAmount', 5000000)">+5jt</button>
+                </div>
+            </div>
+            <button class="btn-primary btn-warning" id="btnTarikReq" onclick="requestTarik()">Kirim Otorisasi ke HP Nasabah</button>
+        </div>
+
+        <!-- 6. SCANNER QR TERPADU -->
+        <div id="scannerSection" class="section">
+            <p style="text-align:center; font-size:0.9rem; color:var(--muted);">Arahkan kamera ke QR Rekening Nasabah</p>
+            <div id="qr-reader"></div>
+        </div>
+
+        <!-- 7. QR REKENING SAYA -->
+        <div id="myqrSection" class="section">
+            <div class="qr-box">
+                <strong id="qrOwnerName">Nama Nasabah</strong>
+                <div style="color:var(--muted); font-size:0.85rem;" id="qrOwnerHp">No. Rek: -</div>
+                <div id="qrcode"></div>
+                <p style="font-size:0.8rem; color:var(--muted);">Tunjukkan QR ini untuk menerima transfer atau setor tunai.</p>
+            </div>
+        </div>
+
+        <!-- 8. MUTASI REKENING & SORTIR / CETAK PDF -->
+        <div id="mutasiSection" class="section">
+            <div class="filter-panel">
+                <div class="field" id="adminMemberFilterBox" style="display:none; gap:4px;">
+                    <label>Filter Nasabah / Rekening</label>
+                    <select id="filterMember" onchange="renderMutations()">
+                        <option value="ALL">Semua Nasabah</option>
+                    </select>
+                </div>
+
+                <div class="filter-row">
+                    <select id="filterMonth" onchange="renderMutations()">
+                        <option value="ALL">Semua Bulan</option>
+                        <option value="0">Januari</option>
+                        <option value="1">Februari</option>
+                        <option value="2">Maret</option>
+                        <option value="3">April</option>
+                        <option value="4">Mei</option>
+                        <option value="5">Juni</option>
+                        <option value="6">Juli</option>
+                        <option value="7">Agustus</option>
+                        <option value="8">September</option>
+                        <option value="9">Oktober</option>
+                        <option value="10">November</option>
+                        <option value="11">Desember</option>
+                    </select>
+
+                    <select id="filterYear" onchange="renderMutations()">
+                        <option value="ALL">Semua Tahun</option>
+                    </select>
+                </div>
+
+                <select id="filterSort" onchange="renderMutations()">
+                    <option value="DESC">Urutan: Terbaru ke Terlama</option>
+                    <option value="ASC">Urutan: Terlama ke Terbaru (Rekening Koran)</option>
+                </select>
+            </div>
+
+            <div class="summary-strip">
+                <div class="summary-box">
+                    <span>Total Kredit (Masuk)</span>
+                    <strong id="sumCredit" style="color:#4ade80;">Rp 0</strong>
+                </div>
+                <div class="summary-box">
+                    <span>Total Debit (Keluar)</span>
+                    <strong id="sumDebit" style="color:#f87171;">Rp 0</strong>
+                </div>
+            </div>
+
+            <div class="list-box" id="mutasiList"></div>
+
+            <button class="btn-primary" onclick="exportMutasiPDF()">🖨️ Cetak / Simpan PDF Mutasi</button>
+        </div>
+
+        <!-- 9. REKAP SALDO NASABAH (ADMIN) -->
+        <div id="rekapAdminSection" class="section">
+            <div class="summary-strip">
+                <div class="summary-box">
+                    <span>Jumlah Rekening</span>
+                    <strong id="rekapCount">0</strong>
+                </div>
+                <div class="summary-box">
+                    <span>Total Dana Kelolaan</span>
+                    <strong id="rekapTotalSaldo" style="color:#4ade80;">Rp 0</strong>
+                </div>
+            </div>
+            <div class="list-box" id="rekapList"></div>
+            <button class="btn-primary" onclick="exportRekapPDF()">🖨️ Cetak / Simpan PDF Rekap Saldo</button>
+        </div>
+
+        <!-- 10. KELOLA NASABAH (ADMIN) -->
+        <div id="kelolaAdminSection" class="section">
+            <div class="list-box" id="nasabahList"></div>
+            <button class="btn-primary" onclick="showAddMemberModal()">+ Tambah Nasabah Baru</button>
+        </div>
+    </div>
+
+    <div id="statusBar"></div>
+</div>
+
+<!-- AREA CETAK PDF RESMI (LATAR PUTIH VIA @media print) -->
+<div id="printableStatementContainer"></div>
+
+<!-- MODAL UNIVERSAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <h3 id="modalTitle">Judul</h3>
+        <p id="modalDesc">Deskripsi</p>
+        <div id="modalCustom"></div>
+        <div class="modal-actions" id="modalActions"></div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbweBlxWvp5tasQ9VjsarDay9etuhB6fe4Nk3G_ooXtpWtuyiuqg2p-Loi0wJHZLlmXm/exec";
+    const TARIK_TICKET_TTL_MS = 5 * 60 * 1000;
+    const SAVED_HP_KEY = "TW_SAVED_HP";
+    const MAX_PIN_ATTEMPTS = 5;
+    const PIN_LOCKOUT_MS = 30 * 1000; // 30 detik jeda setelah 5x salah
+    const LARGE_TRX_THRESHOLD = 1000000; // Konfirmasi ekstra mulai Rp 1.000.000
+
+    const DEFAULT_SCHEMA = {
+        anggota: ["name", "hp", "saldo", "pass", "role", "pinTarik"],
+        mutasi: [
+            "refId", "timestamp", "time", "hp", "user",
+            "counterpartyHp", "counterpartyName", "title",
+            "debit", "kredit", "runningBalance", "petugas", "color"
+        ]
+    };
+
+    let state = {
+        authMode: 'login',
+        user: null,
+        hideBalance: true,
+        members: [],
+        mutations: [],
+        scanContext: 'transfer',
+        scannerInstance: null,
+        isBusy: false,
+        isSyncing: false,
+        lastFilteredMutations: [],
+        lastFilterMeta: {},
+        lastReceipt: null,
+        pinAttempts: {} // { [normHp]: { count, lockedUntil } }
+    };
+
+    let selectedSourceHp = "", selectedTfHp = "", selectedSetorHp = "", selectedTarikHp = "";
+
+    // Normalisasi seragam: 08...
+    function normalizeHp(num) {
+        let d = String(num || "").trim().replace(/^'+/, "").replace(/\D/g, "");
+        if (d.startsWith("62")) d = "0" + d.slice(2);
+        if (d.startsWith("8")) d = "0" + d;
+        return d;
+    }
+
+    const normalizePin = (pin) => String(pin || "").trim().replace(/^'+/, "").replace(/^0+/, "");
+    const formatRp = (n) => `Rp ${(Number(n) || 0).toLocaleString('id-ID')}`;
+
+    function getSavedHp() {
+        try {
+            return normalizeHp(localStorage.getItem(SAVED_HP_KEY) || "");
+        } catch (e) {
+            return "";
         }
-      } catch(err) {
-        statusEl.textContent = 'Gagal terhubung ke jaringan.';
-        statusEl.className = 'text-xs text-center text-red-400 font-bold';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Masuk Panel Admin';
-      }
     }
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
-          .then((reg) => {
-            console.log('Service Worker terdaftar dengan sukses:', reg.scope);
-          })
-          .catch((err) => {
-            console.log('Pendaftaran Service Worker gagal:', err);
-          });
-      });
+
+    function setSavedHp(hp) {
+        try {
+            const clean = normalizeHp(hp);
+            if (clean) localStorage.setItem(SAVED_HP_KEY, clean);
+        } catch (e) {}
     }
-  </script>
+
+    function clearSavedHp() {
+        try {
+            localStorage.removeItem(SAVED_HP_KEY);
+        } catch (e) {}
+    }
+
+    function applySavedHpToAuthInput(focusPinIfPresent = false) {
+        const savedHp = getSavedHp();
+        const hpInput = document.getElementById('authHp');
+        const pinInput = document.getElementById('authPin');
+        if (!hpInput) return;
+
+        if (savedHp) {
+            hpInput.value = savedHp;
+            if (focusPinIfPresent && pinInput && state.authMode === 'login') {
+                setTimeout(() => pinInput.focus(), 80);
+            }
+        }
+    }
+
+    // --- RATE LIMIT / LOCKOUT PIN ---
+    function checkPinLockout(hp) {
+        const key = normalizeHp(hp) || "_default";
+        const rec = state.pinAttempts[key];
+        if (!rec || !rec.lockedUntil) return 0;
+        const remainMs = rec.lockedUntil - Date.now();
+        if (remainMs <= 0) {
+            delete state.pinAttempts[key];
+            return 0;
+        }
+        return Math.ceil(remainMs / 1000);
+    }
+
+    function recordFailedPin(hp) {
+        const key = normalizeHp(hp) || "_default";
+        const prev = state.pinAttempts[key] || { count: 0, lockedUntil: 0 };
+        const nextCount = prev.count + 1;
+        if (nextCount >= MAX_PIN_ATTEMPTS) {
+            state.pinAttempts[key] = { count: 0, lockedUntil: Date.now() + PIN_LOCKOUT_MS };
+        } else {
+            state.pinAttempts[key] = { count: nextCount, lockedUntil: 0 };
+        }
+        return MAX_PIN_ATTEMPTS - (state.pinAttempts[key].count || 0);
+    }
+
+    function clearFailedPin(hp) {
+        const key = normalizeHp(hp) || "_default";
+        delete state.pinAttempts[key];
+    }
+
+    function ensureDefaultSchema() {
+        if (!Array.isArray(state.members)) state.members = [];
+        if (!Array.isArray(state.mutations)) state.mutations = [];
+        state.members = state.members.map(m => {
+            const out = {};
+            DEFAULT_SCHEMA.anggota.forEach(col => {
+                out[col] = m && m[col] !== undefined ? m[col] : (col === "saldo" ? 0 : "");
+            });
+            return out;
+        });
+    }
+
+    function formatWaNumber(num) {
+        const digits = String(num || "").replace(/\D/g, "");
+        if (!digits) return "";
+        if (digits.startsWith("62")) return digits;
+        if (digits.startsWith("0")) return "62" + digits.slice(1);
+        return "62" + digits;
+    }
+
+    function parseNominal(inputId) {
+        const el = document.getElementById(inputId);
+        if (!el) return 0;
+        const digits = String(el.value || "").replace(/\D/g, "");
+        return digits ? parseInt(digits, 10) : 0;
+    }
+
+    function formatNominalInput(el) {
+        const digits = String(el.value || "").replace(/\D/g, "");
+        if (!digits) {
+            el.value = "";
+            return;
+        }
+        el.value = parseInt(digits, 10).toLocaleString('id-ID');
+    }
+
+    function addNominal(inputId, val) {
+        const el = document.getElementById(inputId);
+        if (!el) return;
+        const nextTotal = parseNominal(inputId) + val;
+        el.value = nextTotal.toLocaleString('id-ID');
+    }
+
+    function clearNominal(inputId) {
+        const el = document.getElementById(inputId);
+        if (el) {
+            el.value = "";
+            el.focus();
+        }
+    }
+
+    async function hashPin(rawPin) {
+        const clean = String(rawPin || "").trim();
+        if (!clean) return "";
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(clean));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function generateRefId(prefix = "TRX") {
+        const now = new Date();
+        const ymd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        return `${prefix}-${ymd}-${rand}`;
+    }
+
+    function parseMutationTimestamp(m) {
+        if (typeof m.timestamp === 'number' && m.timestamp > 0) return m.timestamp;
+        if (m.isoDate) {
+            const parsed = Date.parse(m.isoDate);
+            if (!isNaN(parsed)) return parsed;
+        }
+        if (m.time) {
+            const match = String(m.time).match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[,\s]+(\d{1,2})[:.](\d{1,2})(?:[:.](\d{1,2}))?)?/);
+            if (match) {
+                const day = parseInt(match[1], 10);
+                const month = parseInt(match[2], 10) - 1;
+                const year = parseInt(match[3], 10);
+                const hour = parseInt(match[4] || "0", 10);
+                const min = parseInt(match[5] || "0", 10);
+                const sec = parseInt(match[6] || "0", 10);
+                const d = new Date(year, month, day, hour, min, sec);
+                if (!isNaN(d.getTime())) return d.getTime();
+            }
+            const fallback = Date.parse(m.time);
+            if (!isNaN(fallback)) return fallback;
+        }
+        return Date.now();
+    }
+
+    function extractAmountFallback(raw) {
+        if (raw.amount !== undefined && raw.amount !== null && raw.amount !== "") {
+            const num = parseInt(String(raw.amount).replace(/[^\d]/g, ""), 10) || 0;
+            if (String(raw.amount).trim().startsWith("-")) return { debit: num, kredit: 0 };
+            return { debit: 0, kredit: num };
+        }
+        return { debit: 0, kredit: 0 };
+    }
+
+    function normalizeMutationRecord(raw) {
+        const ts = parseMutationTimestamp(raw);
+        const dt = new Date(ts);
+        const formattedTime = raw.time || dt.toLocaleString('id-ID', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+
+        let debit = parseInt(String(raw.debit || 0).replace(/[^\d]/g, ""), 10) || 0;
+        let kredit = parseInt(String(raw.kredit || 0).replace(/[^\d]/g, ""), 10) || 0;
+
+        if (!debit && !kredit) {
+            const fb = extractAmountFallback(raw);
+            debit = fb.debit;
+            kredit = fb.kredit;
+        }
+
+        const matchedMember = state.members.find(m =>
+            normalizeHp(m.hp) === normalizeHp(raw.hp) ||
+            m.name === raw.user
+        );
+
+        const accountHp = raw.hp ? normalizeHp(raw.hp) : (matchedMember ? normalizeHp(matchedMember.hp) : "");
+        const accountName = raw.user || (matchedMember ? matchedMember.name : "-");
+
+        const rawRun = raw.runningBalance;
+        const validRun = rawRun !== undefined && rawRun !== null && String(rawRun).trim() !== "" && !isNaN(Number(rawRun))
+            ? Number(rawRun)
+            : null;
+
+        return {
+            refId: raw.refId || raw.trxId || "-",
+            timestamp: ts,
+            year: dt.getFullYear(),
+            month: dt.getMonth(),
+            displayTime: formattedTime,
+            hp: accountHp,
+            user: accountName,
+            counterpartyName: raw.counterpartyName || "",
+            counterpartyHp: raw.counterpartyHp || "",
+            title: raw.title || "Transaksi",
+            debit,
+            kredit,
+            runningBalance: validRun,
+            petugas: raw.petugas || "Sistem",
+            color: raw.color || (kredit > 0 ? "var(--success)" : "var(--danger)")
+        };
+    }
+
+    // --- API SYNC (DENGAN GUARD IS-SYNCING) ---
+    async function syncData() {
+        if (state.isSyncing) return;
+        state.isSyncing = true;
+        try {
+            const res = await fetch(`${API_URL}?action=getData`);
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const data = await res.json();
+            if (data.status === "error") throw new Error(data.message);
+
+            state.members = (data.anggota || []).map(m => ({
+                ...m,
+                hp: normalizeHp(m.hp)
+            }));
+            ensureDefaultSchema();
+            const rawMutations = data.mutasi || [];
+            state.mutations = rawMutations.map(normalizeMutationRecord);
+
+            if (state.user) {
+                const updated = state.members.find(m => normalizeHp(m.hp) === normalizeHp(state.user.hp));
+                if (updated) {
+                    state.user.saldo = Number(updated.saldo) || 0;
+                    state.user.pass = String(updated.pass || "");
+                    renderBalance();
+
+                    if (!state.user.isAdmin && updated.pinTarik) {
+                        const parts = String(updated.pinTarik).split("|");
+                        const reqAmount = Number(parts[0]) || 0;
+                        const expiredAt = Number(parts[3]) || 0;
+
+                        if ((expiredAt > 0 && Date.now() > expiredAt) || (reqAmount > 0 && state.user.saldo < reqAmount)) {
+                            await autoRejectInsufficientOrExpired(reqAmount, expiredAt > 0 && Date.now() > expiredAt);
+                        } else {
+                            openTarikApprovalModal(updated.pinTarik);
+                        }
+                    }
+                }
+            }
+
+            if (document.getElementById('transferSection').classList.contains('active')) {
+                updateTransferSourceInfo();
+            }
+            if (document.getElementById('mutasiSection').classList.contains('active')) {
+                populateMutationFilters(false);
+                renderMutations();
+            }
+            if (document.getElementById('rekapAdminSection').classList.contains('active')) {
+                renderRekap();
+            }
+            if (document.getElementById('kelolaAdminSection').classList.contains('active')) {
+                renderNasabah();
+            }
+        } catch (e) {
+            console.error("Sync error:", e);
+            if (!state.isBusy) setStatus("Sinkronisasi tertunda — memeriksa koneksi...");
+        } finally {
+            state.isSyncing = false;
+        }
+    }
+
+    async function autoRejectInsufficientOrExpired(reqAmount, isExpired) {
+        await sendPost({ type: "requestTarik", trxId: generateRefId("AUTO-REJ"), hp: state.user.hp, pin: "" });
+        if (document.getElementById('modalOverlay').style.display !== 'flex') {
+            if (isExpired) {
+                showModal("Tiket Kedaluwarsa", "Permintaan tarik tunai melewati batas waktu 5 menit dan otomatis dibatalkan.");
+            } else {
+                showModal(
+                    "Ditolak Otomatis (Saldo Kurang)",
+                    `Permintaan tarik tunai sebesar <strong>${formatRp(reqAmount)}</strong> otomatis ditolak karena saldo Anda saat ini <strong>${formatRp(state.user.saldo)}</strong> tidak mencukupi.`
+                );
+            }
+        }
+    }
+
+    async function sendPost(payload) {
+        if (!payload.trxId) payload.trxId = generateRefId("REQ");
+        setStatus("Memproses transaksi ke server...");
+        try {
+            const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+            if (!res.ok) throw new Error("Gagal merespons (" + res.status + ")");
+            const json = await res.json();
+            setStatus("");
+            return json;
+        } catch (e) {
+            setStatus("Koneksi terputus saat mengirim data.");
+            return {
+                status: "network_error",
+                message: "Status pengiriman tidak pasti karena koneksi terputus. Periksa mutasi/saldo sebelum mencoba ulang agar tidak ganda."
+            };
+        }
+    }
+
+    // --- AUTHENTICATION & MIGRASI HASH ---
+    function setAuthMode(mode) {
+        state.authMode = mode;
+        document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+        document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+        document.getElementById('nameField').style.display = mode === 'register' ? 'flex' : 'none';
+        document.getElementById('pinLabel').textContent = mode === 'register' ? 'Buat PIN Keamanan (6 Digit)' : 'Masukkan PIN (6 Digit)';
+        document.getElementById('authSubmitBtn').textContent = mode === 'register' ? 'Daftar Rekening' : 'Masuk';
+        if (mode === 'login') applySavedHpToAuthInput(false);
+    }
+
+    async function verifyPinWithStatus(rawPin, storedPass) {
+        const cleanPin = String(rawPin || "").trim();
+        const cleanStored = String(storedPass || "").trim();
+        if (!cleanPin || !cleanStored) return { valid: false, isPlaintext: false };
+
+        const hashed = await hashPin(cleanPin);
+        if (cleanStored === hashed) {
+            return { valid: true, isPlaintext: false };
+        }
+
+        const plainMatch = cleanStored === cleanPin || normalizePin(cleanStored) === normalizePin(cleanPin);
+        return { valid: plainMatch, isPlaintext: plainMatch };
+    }
+
+    async function submitAuth() {
+        if (state.isBusy) return;
+        const rawHpInput = document.getElementById('authHp').value.trim();
+        const hp = normalizeHp(rawHpInput);
+        const pin = document.getElementById('authPin').value.trim();
+
+        const lockSec = checkPinLockout(hp);
+        if (lockSec > 0) {
+            return showModal("Akses Ditahan Sementara", `Terlalu banyak percobaan salah PIN. Coba lagi dalam <strong>${lockSec} detik</strong>.`);
+        }
+
+        if (!hp || hp.length < 8 || (state.authMode === 'register' && pin.length < 4)) {
+            return showModal("Validasi Gagal", "Masukkan Nomor HP valid dan PIN minimal 4-6 digit.");
+        }
+        if (state.members.length === 0) await syncData();
+
+        state.isBusy = true;
+        const btn = document.getElementById('authSubmitBtn');
+        btn.disabled = true;
+
+        try {
+            if (state.authMode === 'register') {
+                const name = document.getElementById('regName').value.trim();
+                if (!name) return showModal("Validasi Gagal", "Nama lengkap wajib diisi.");
+                if (state.members.some(m => normalizeHp(m.hp) === hp)) {
+                    return showModal("Gagal", "Nomor HP sudah terdaftar sebagai rekening.");
+                }
+
+                const pinHash = await hashPin(pin);
+                const regResp = await sendPost({ type: "register", name, hp, saldo: 0, pass: pinHash });
+                if (regResp.status !== "ok") {
+                    return showModal("Gagal Daftar", regResp.message || "Pendaftaran tidak berhasil.");
+                }
+
+                setSavedHp(hp);
+                await syncData();
+
+                showModal(
+                    "Rekening Aktif",
+                    "Pendaftaran berhasil. Silakan masuk menggunakan Nomor HP dan PIN Anda.",
+                    "",
+                    `<button class="btn-primary" onclick="closeModal(); document.getElementById('authPin').value=''; setAuthMode('login'); applySavedHpToAuthInput(true);">OK</button>`
+                );
+            } else {
+                const found = state.members.find(m => normalizeHp(m.hp) === hp);
+                if (!found) return showModal("Gagal Masuk", "Nomor rekening tidak ditemukan.");
+
+                if (!found.pass || found.pass === "1234") {
+                    setSavedHp(found.hp);
+                    return openForcePinModal(found);
+                }
+
+                if (pin.length < 4) {
+                    return showModal("Validasi Gagal", "Masukkan PIN Anda (minimal 4-6 digit).");
+                }
+
+                const check = await verifyPinWithStatus(pin, found.pass);
+                if (!check.valid) {
+                    const left = recordFailedPin(hp);
+                    const secNow = checkPinLockout(hp);
+                    if (secNow > 0) {
+                        return showModal("PIN Terkunci Sementara", `Anda salah memasukkan PIN ${MAX_PIN_ATTEMPTS} kali. Tunggu <strong>${secNow} detik</strong> sebelum mencoba lagi.`);
+                    }
+                    return showModal("Gagal Masuk", `PIN yang Anda masukkan salah. Sisa percobaan: <strong>${left}x</strong>.`);
+                }
+
+                clearFailedPin(hp);
+                setSavedHp(found.hp);
+
+                // Migrasi otomatis PIN lama plaintext ke SHA-256
+                let activePass = String(found.pass);
+                if (check.isPlaintext) {
+                    const migratedHash = await hashPin(pin);
+                    await sendPost({ type: "updateCredentials", hp: found.hp, pass: migratedHash });
+                    activePass = migratedHash;
+                }
+
+                state.user = {
+                    name: found.name,
+                    hp: normalizeHp(found.hp),
+                    saldo: Number(found.saldo) || 0,
+                    pass: activePass,
+                    isAdmin: (found.role && found.role.toLowerCase() === 'admin')
+                };
+
+                document.getElementById('authPin').value = "";
+                document.getElementById('logoutBtn').style.display = 'block';
+                document.getElementById('accInfo').textContent = `${state.user.name} • Rek: ${state.user.hp}`;
+                document.getElementById('btnWargaTarik').style.display = state.user.isAdmin ? 'none' : 'flex';
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = state.user.isAdmin ? 'flex' : 'none');
+
+                renderBalance();
+                navigate('home');
+                syncData();
+            }
+        } finally {
+            state.isBusy = false;
+            btn.disabled = false;
+        }
+    }
+
+    function openForcePinModal(user) {
+        showModal(
+            "Aktivasi / Reset PIN",
+            `Halo <strong>${user.name}</strong>, PIN Anda belum diatur atau baru saja direset. Silakan buat PIN 6 digit baru sebelum melanjutkan:`,
+            `<input type="password" inputmode="numeric" maxlength="6" id="newPinInput" placeholder="Masukkan 6 digit PIN baru" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--border); color:#fff; border-radius:8px; text-align:center; font-size:1.1rem;">`,
+            `<button class="btn-primary" onclick="saveInitialPin('${user.hp}')">Simpan PIN Baru</button>`
+        );
+    }
+
+    async function saveInitialPin(hp) {
+        const newPin = document.getElementById('newPinInput').value.trim();
+        if (newPin.length < 4) return alert("PIN minimal 4-6 digit angka.");
+        const pinHash = await hashPin(newPin);
+        await sendPost({ type: "updateCredentials", hp: normalizeHp(hp), pass: pinHash });
+        setSavedHp(hp);
+        await syncData();
+        document.getElementById('authPin').value = "";
+        closeModal();
+        applySavedHpToAuthInput(true);
+        showModal("Berhasil", "PIN baru berhasil disimpan. Silakan masuk kembali.");
+    }
+
+    function logout() {
+        stopScanner();
+        closeModal();
+        clearSavedHp();
+        state.user = null;
+        selectedSourceHp = "";
+        selectedTfHp = "";
+        document.getElementById('authHp').value = "";
+        document.getElementById('authPin').value = "";
+        document.getElementById('logoutBtn').style.display = 'none';
+        navigate('auth');
+    }
+
+    // --- NAVIGATION & UI ---
+    function navigate(page) {
+        stopScanner();
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(`${page}Section`).classList.add('active');
+
+        const titles = {
+            auth: "Tabungan Warga", home: "Beranda", transfer: "Transfer Dana",
+            setorAdmin: "Setor Tunai", tarikAdmin: "Tarik Tunai", scanner: "Pindai QR",
+            myqr: "QR Rekening", mutasi: "Mutasi & PDF", rekapAdmin: "Rekap Saldo", kelolaAdmin: "Data Nasabah"
+        };
+        document.getElementById('pageTitle').textContent = titles[page] || "Tabungan Warga";
+        document.getElementById('backBtn').style.display = (page === 'home' || page === 'auth') ? 'none' : 'block';
+
+        if (page === 'auth') {
+            applySavedHpToAuthInput(true);
+        }
+        if (page === 'transfer') {
+            const isAdmin = !!(state.user && state.user.isAdmin);
+            document.getElementById('adminSourceField').style.display = isAdmin ? 'flex' : 'none';
+            if (!isAdmin) {
+                selectedSourceHp = "";
+                document.getElementById('tfSource').value = "";
+            }
+            updateTransferSourceInfo();
+        }
+        if (page === 'myqr') renderMyQR();
+        if (page === 'mutasi') {
+            populateMutationFilters(true);
+            renderMutations();
+        }
+        if (page === 'rekapAdmin') renderRekap();
+        if (page === 'kelolaAdmin') renderNasabah();
+    }
+
+    function toggleBalance() {
+        state.hideBalance = !state.hideBalance;
+        renderBalance();
+    }
+
+    function renderBalance() {
+        if (!state.user) return;
+        document.getElementById('balanceText').textContent = state.hideBalance
+            ? "Rp ••••••••"
+            : formatRp(state.user.saldo);
+        document.getElementById('balanceHint').textContent = state.hideBalance
+            ? "Ketuk untuk menampilkan saldo"
+            : "Ketuk untuk menyembunyikan saldo";
+    }
+
+    // --- SEARCH AUTOCOMPLETE ---
+    function searchMember(query, boxId, inputId, onSelect) {
+        const box = document.getElementById(boxId);
+        const q = query.trim().toLowerCase();
+        if (!q) { box.style.display = 'none'; return; }
+
+        const matches = state.members.filter(m => m.name.toLowerCase().includes(q) || normalizeHp(m.hp).includes(normalizeHp(q)));
+        box.innerHTML = matches.map(m => `
+            <div class="suggestion-item" onclick="selectSuggestion('${boxId}', '${inputId}', '${m.name.replace(/'/g, "\\'")}', '${m.hp}', ${onSelect})">
+                <strong>${m.name}</strong><span>${m.hp}</span>
+            </div>
+        `).join('');
+        box.style.display = matches.length ? 'block' : 'none';
+    }
+
+    function selectSuggestion(boxId, inputId, name, hp, callback) {
+        document.getElementById(inputId).value = `${name} (${hp})`;
+        document.getElementById(boxId).style.display = 'none';
+        callback(hp);
+    }
+
+    function searchSourceMember(query) {
+        const box = document.getElementById('tfSourceSuggest');
+        const q = query.trim().toLowerCase();
+
+        if (!q) {
+            selectedSourceHp = "";
+            box.style.display = 'none';
+            updateTransferSourceInfo();
+            return;
+        }
+
+        const matches = state.members.filter(m => m.name.toLowerCase().includes(q) || normalizeHp(m.hp).includes(normalizeHp(q)));
+        box.innerHTML = matches.map(m => `
+            <div class="suggestion-item" onclick="selectSourceSuggestion('${m.name.replace(/'/g, "\\'")}', '${m.hp}', ${Number(m.saldo) || 0})">
+                <strong>${m.name}</strong><span>${m.hp} • ${formatRp(m.saldo)}</span>
+            </div>
+        `).join('');
+        box.style.display = matches.length ? 'block' : 'none';
+        updateTransferSourceInfo();
+    }
+
+    function selectSourceSuggestion(name, hp, saldo) {
+        document.getElementById('tfSource').value = `${name} (${hp})`;
+        document.getElementById('tfSourceSuggest').style.display = 'none';
+        selectedSourceHp = hp;
+        updateTransferSourceInfo();
+    }
+
+    function resolveTransferSource() {
+        const isAdmin = !!(state.user && state.user.isAdmin);
+        const rawInput = isAdmin ? document.getElementById('tfSource').value.trim() : "";
+
+        if (!isAdmin || !rawInput) {
+            const adminMember = state.members.find(m => normalizeHp(m.hp) === normalizeHp(state.user.hp)) || state.user;
+            return {
+                isOtherMember: false,
+                hp: normalizeHp(adminMember.hp),
+                name: adminMember.name,
+                saldo: Number(state.user.saldo) || 0,
+                pass: String(adminMember.pass || state.user.pass || ""),
+                found: true
+            };
+        }
+
+        const candidateHp = selectedSourceHp || rawInput;
+        const found = state.members.find(m =>
+            normalizeHp(m.hp) === normalizeHp(candidateHp) ||
+            m.name.toLowerCase() === rawInput.toLowerCase()
+        );
+
+        if (!found) {
+            return { found: false, isOtherMember: true };
+        }
+
+        const isSameAsAdmin = normalizeHp(found.hp) === normalizeHp(state.user.hp);
+        return {
+            found: true,
+            isOtherMember: !isSameAsAdmin,
+            hp: normalizeHp(found.hp),
+            name: found.name,
+            saldo: Number(found.saldo) || 0,
+            pass: String(found.pass || "")
+        };
+    }
+
+    function updateTransferSourceInfo() {
+        const infoEl = document.getElementById('tfSourceInfo');
+        if (!infoEl || !state.user || !state.user.isAdmin) return;
+
+        const rawInput = document.getElementById('tfSource').value.trim();
+        if (!rawInput) {
+            infoEl.textContent = `Sumber: ${state.user.name} (Saldo: ${formatRp(state.user.saldo)}) • Validasi PIN Admin`;
+            return;
+        }
+
+        const src = resolveTransferSource();
+        if (!src.found) {
+            infoEl.textContent = "Sumber rekening belum cocok dengan nasabah terdaftar.";
+        } else if (!src.isOtherMember) {
+            infoEl.textContent = `Sumber: ${src.name} (Saldo: ${formatRp(src.saldo)}) • Validasi PIN Admin`;
+        } else {
+            infoEl.textContent = `Sumber: ${src.name} (Saldo: ${formatRp(src.saldo)}) • Input PIN Nasabah di layar konfirmasi`;
+        }
+    }
+
+    // --- TRANSACTIONS (TRANSFER, SETOR, TARIK) ---
+    function promptTransferPin() {
+        const src = resolveTransferSource();
+        const targetHp = selectedTfHp || document.getElementById('tfTarget').value.trim();
+        const amount = parseNominal('tfAmount');
+
+        if (!src.found) {
+            return showModal("Sumber Tidak Ditemukan", "Pilih atau masukkan nama/nomor HP sumber rekening yang terdaftar.");
+        }
+        if (!targetHp || amount < 1000) {
+            return showModal("Validasi", "Pilih rekening tujuan dan masukkan nominal minimal Rp 1.000.");
+        }
+        if (normalizeHp(targetHp) === normalizeHp(src.hp)) {
+            return showModal("Validasi", "Rekening tujuan tidak boleh sama dengan sumber rekening.");
+        }
+        if (amount > src.saldo) {
+            return showModal(
+                "Saldo Tidak Cukup",
+                `Saldo sumber rekening <strong>${src.name}</strong> (${formatRp(src.saldo)}) tidak mencukupi untuk transfer ${formatRp(amount)}.`
+            );
+        }
+
+        const receiver = state.members.find(m => normalizeHp(m.hp) === normalizeHp(targetHp));
+        if (!receiver) {
+            return showModal("Rekening Tidak Ditemukan", "Pastikan nomor rekening tujuan sudah benar.");
+        }
+
+        if (src.isOtherMember && (!src.pass || src.pass === "1234")) {
+            return showModal(
+                "PIN Nasabah Belum Aktif",
+                `Rekening pengirim <strong>${src.name}</strong> belum memiliki PIN aktif. Minta nasabah mengaktifkan PIN terlebih dahulu sebelum transfer.`
+            );
+        }
+
+        const pinOwnerLabel = src.isOtherMember
+            ? `PIN Nasabah Pengirim (<strong>${src.name}</strong>)`
+            : `PIN Anda (<strong>${state.user.name}</strong>)`;
+
+        const largeWarning = amount >= LARGE_TRX_THRESHOLD
+            ? `<div style="background:rgba(217,119,6,0.18); border:1px solid var(--warning); color:#fcd34d; padding:8px; border-radius:8px; font-size:0.78rem; margin-bottom:10px;">⚠️ Nominal besar (${formatRp(amount)}). Periksa kembali nama & nomor rekening penerima sebelum mengirim.</div>`
+            : "";
+
+        showModal(
+            "Konfirmasi Transfer",
+            `${largeWarning}` +
+            `Dari: <strong>${src.name}</strong> (${normalizeHp(src.hp)})<br>` +
+            `Ke: <strong>${receiver.name}</strong> (${normalizeHp(receiver.hp)})<br>` +
+            `Nominal: <strong>${formatRp(amount)}</strong><br><br>` +
+            `Masukkan ${pinOwnerLabel} di layar ini:`,
+            `<input type="password" inputmode="numeric" maxlength="6" id="confirmTfPin" placeholder="••••••" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--border); color:#fff; border-radius:8px; text-align:center; font-size:1.2rem;">`,
+            `<button class="btn-sm" style="flex:1; padding:12px;" onclick="closeModal()">Batal</button>
+             <button class="btn-primary btn-success" id="btnConfirmTf" style="flex:1; margin:0;" onclick="executeTransfer('${src.hp}', '${receiver.hp}', ${amount}, ${src.isOtherMember})">Kirim</button>`
+        );
+    }
+
+    async function executeTransfer(senderHp, receiverHp, amount, isOtherMember) {
+        if (state.isBusy) return;
+        const pin = document.getElementById('confirmTfPin').value.trim();
+
+        const senderMember = state.members.find(m => normalizeHp(m.hp) === normalizeHp(senderHp));
+        const expectedPass = isOtherMember
+            ? String(senderMember?.pass || "")
+            : String(state.user.pass || "");
+
+        const check = await verifyPinWithStatus(pin, expectedPass);
+        if (!check.valid) {
+            return alert(isOtherMember ? "PIN Nasabah Pengirim Salah!" : "PIN Keamanan Salah!");
+        }
+
+        state.isBusy = true;
+        const confirmBtn = document.getElementById('btnConfirmTf');
+        if (confirmBtn) confirmBtn.disabled = true;
+
+        try {
+            closeModal();
+            const receiver = state.members.find(m => normalizeHp(m.hp) === normalizeHp(receiverHp));
+            const currentSenderSaldo = Number(senderMember?.saldo) || 0;
+            const currentReceiverSaldo = Number(receiver?.saldo) || 0;
+
+            if (amount > currentSenderSaldo) {
+                return showModal("Saldo Tidak Cukup", `Saldo <strong>${senderMember?.name || senderHp}</strong> tidak mencukupi.`);
+            }
+
+            const now = new Date();
+            const ts = now.getTime();
+            const timeStr = now.toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const refId = generateRefId("TRF");
+
+            const senderNewSaldo = currentSenderSaldo - amount;
+            const receiverNewSaldo = currentReceiverSaldo + amount;
+            const byAdminNote = isOtherMember ? ` • Diproses Admin ${state.user.name}` : "";
+
+            const entryDebit = {
+                refId, trxId: `${refId}-DR`, timestamp: ts, time: timeStr,
+                hp: normalizeHp(senderMember.hp), user: senderMember.name,
+                counterpartyHp: normalizeHp(receiver.hp), counterpartyName: receiver.name,
+                title: `Transfer Keluar ke ${receiver.name} (${normalizeHp(receiver.hp)})${byAdminNote}`,
+                debit: amount, kredit: 0, runningBalance: senderNewSaldo,
+                amount: `-${formatRp(amount)}`, petugas: state.user.hp, color: "var(--danger)"
+            };
+
+            const entryCredit = {
+                refId, trxId: `${refId}-CR`, timestamp: ts, time: timeStr,
+                hp: normalizeHp(receiver.hp), user: receiver.name,
+                counterpartyHp: normalizeHp(senderMember.hp), counterpartyName: senderMember.name,
+                title: `Transfer Masuk dari ${senderMember.name} (${normalizeHp(senderMember.hp)})${byAdminNote}`,
+                debit: 0, kredit: amount, runningBalance: receiverNewSaldo,
+                amount: `+${formatRp(amount)}`, petugas: state.user.hp, color: "var(--success)"
+            };
+
+            const resp = await sendPost({
+                type: "transfer",
+                refId,
+                trxId: refId,
+                senderHp: normalizeHp(senderMember.hp),
+                senderSaldo: senderNewSaldo,
+                receiverHp: normalizeHp(receiver.hp),
+                receiverSaldo: receiverNewSaldo,
+                user: senderMember.name,
+                petugas: state.user.hp,
+                title: entryDebit.title,
+                time: timeStr,
+                timestamp: ts,
+                amount: `-${formatRp(amount)}`,
+                color: "var(--danger)",
+                entries: [entryDebit, entryCredit]
+            });
+
+            if (resp.status !== "ok") {
+                await syncData();
+                return showModal(resp.status === "network_error" ? "Status Jaringan Belum Pasti" : "Transfer Gagal", resp.message || "Transaksi tidak dapat diproses.");
+            }
+
+            const finalSaldo = typeof resp.senderSaldo === "number" ? resp.senderSaldo : senderNewSaldo;
+            if (normalizeHp(senderHp) === normalizeHp(state.user.hp)) {
+                state.user.saldo = finalSaldo;
+                renderBalance();
+            }
+
+            await syncData();
+            document.getElementById('tfSource').value = "";
+            document.getElementById('tfTarget').value = "";
+            document.getElementById('tfAmount').value = "";
+            selectedSourceHp = "";
+            selectedTfHp = "";
+            updateTransferSourceInfo();
+
+            showReceipt({
+                refId,
+                jenis: isOtherMember ? "TRANSFER (OTORISASI PENGIRIM)" : "TRANSFER ANTAR REKENING",
+                nama: `${senderMember.name} → ${receiver.name}`,
+                hp: normalizeHp(receiver.hp),
+                nominal: amount,
+                saldo: finalSaldo,
+                waktu: timeStr,
+                petugas: state.user.hp
+            });
+            navigate('home');
+        } finally {
+            state.isBusy = false;
+        }
+    }
+
+    async function executeSetor() {
+        if (state.isBusy) return;
+        const targetHp = selectedSetorHp || document.getElementById('setorTarget').value.trim();
+        const amount = parseNominal('setorAmount');
+
+        if (!targetHp || amount < 1000) return showModal("Validasi", "Lengkapi data nasabah dan masukkan nominal minimal Rp 1.000.");
+        const target = state.members.find(m => normalizeHp(m.hp) === normalizeHp(targetHp));
+        if (!target) return showModal("Gagal", "Rekening nasabah tidak ditemukan.");
+
+        if (amount >= LARGE_TRX_THRESHOLD) {
+            const okLarge = confirm(`Konfirmasi Setor Tunai Nominal Besar:\nNasabah: ${target.name} (${normalizeHp(target.hp)})\nNominal: ${formatRp(amount)}\n\nLanjutkan proses?`);
+            if (!okLarge) return;
+        }
+
+        state.isBusy = true;
+        const btn = document.getElementById('btnSetorExec');
+        btn.disabled = true;
+
+        try {
+            const newSaldo = (Number(target.saldo) || 0) + amount;
+            const now = new Date();
+            const ts = now.getTime();
+            const timeStr = now.toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const refId = generateRefId("STR");
+
+            const entryCredit = {
+                refId, trxId: refId, timestamp: ts, time: timeStr,
+                hp: normalizeHp(target.hp), user: target.name,
+                counterpartyHp: normalizeHp(state.user.hp), counterpartyName: state.user.name,
+                title: `Setor Tunai (Teller: ${state.user.name})`,
+                debit: 0, kredit: amount, runningBalance: newSaldo,
+                amount: `+${formatRp(amount)}`, petugas: state.user.hp, color: "var(--success)"
+            };
+
+            const resp = await sendPost({
+                type: "setorTunai",
+                refId,
+                trxId: refId,
+                receiverHp: normalizeHp(target.hp),
+                receiverSaldo: newSaldo,
+                user: target.name,
+                petugas: state.user.hp,
+                title: entryCredit.title,
+                time: timeStr,
+                timestamp: ts,
+                amount: `+${formatRp(amount)}`,
+                color: "var(--success)",
+                entries: [entryCredit]
+            });
+
+            if (resp.status !== "ok") {
+                await syncData();
+                return showModal(resp.status === "network_error" ? "Status Jaringan Belum Pasti" : "Setor Tunai Gagal", resp.message || "Transaksi gagal diproses.");
+            }
+
+            const finalSaldo = typeof resp.receiverSaldo === "number" ? resp.receiverSaldo : newSaldo;
+            await syncData();
+            document.getElementById('setorTarget').value = "";
+            document.getElementById('setorAmount').value = "";
+            selectedSetorHp = "";
+
+            showReceipt({
+                refId,
+                jenis: "SETOR TUNAI",
+                nama: target.name,
+                hp: normalizeHp(target.hp),
+                nominal: amount,
+                saldo: finalSaldo,
+                waktu: timeStr,
+                petugas: state.user.hp
+            });
+        } finally {
+            state.isBusy = false;
+            btn.disabled = false;
+        }
+    }
+
+    async function requestTarik() {
+        if (state.isBusy) return;
+        const targetHp = selectedTarikHp || document.getElementById('tarikTarget').value.trim();
+        const amount = parseNominal('tarikAmount');
+
+        if (!targetHp || amount < 1000) return showModal("Validasi", "Lengkapi data nasabah dan masukkan nominal minimal Rp 1.000.");
+        const target = state.members.find(m => normalizeHp(m.hp) === normalizeHp(targetHp));
+        if (!target) return showModal("Gagal", "Nasabah tidak ditemukan.");
+
+        const targetSaldo = Number(target.saldo) || 0;
+        if (amount > targetSaldo) {
+            return showModal(
+                "Ditolak Otomatis (Saldo Tidak Cukup)",
+                `Penarikan sebesar <strong>${formatRp(amount)}</strong> otomatis ditolak karena saldo <strong>${target.name}</strong> hanya <strong>${formatRp(targetSaldo)}</strong>.`
+            );
+        }
+
+        if (amount >= LARGE_TRX_THRESHOLD) {
+            const okLarge = confirm(`Konfirmasi Tarik Tunai Nominal Besar:\nNasabah: ${target.name} (${normalizeHp(target.hp)})\nNominal: ${formatRp(amount)}\n\nKirim tiket otorisasi ke HP nasabah?`);
+            if (!okLarge) return;
+        }
+
+        state.isBusy = true;
+        const btn = document.getElementById('btnTarikReq');
+        btn.disabled = true;
+
+        try {
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            const expiredAt = Date.now() + TARIK_TICKET_TTL_MS;
+            const refId = generateRefId("TRK");
+
+            const resp = await sendPost({
+                type: "requestTarik",
+                trxId: refId,
+                hp: normalizeHp(target.hp),
+                pin: `${amount}|${otp}|${state.user.hp}|${expiredAt}`
+            });
+
+            if (resp && resp.status === "rejected") {
+                return showModal("Ditolak Otomatis", resp.message || "Saldo nasabah tidak mencukupi.");
+            }
+            if (resp && resp.status === "network_error") {
+                return showModal("Status Jaringan Belum Pasti", resp.message);
+            }
+
+            document.getElementById('tarikTarget').value = "";
+            document.getElementById('tarikAmount').value = "";
+            selectedTarikHp = "";
+
+            showModal(
+                "Tiket Otorisasi Terkirim",
+                `Permintaan tarik tunai <strong>${formatRp(amount)}</strong> untuk <strong>${target.name}</strong> aktif selama 5 menit.<br>Kode Verifikasi: <span class="otp-badge">${otp}</span>`
+            );
+            navigate('home');
+        } finally {
+            state.isBusy = false;
+            btn.disabled = false;
+        }
+    }
+
+    function openTarikApprovalModal(pinData) {
+        if (document.getElementById('modalOverlay').style.display === 'flex') return;
+        const parts = String(pinData).split('|');
+        const amount = Number(parts[0]) || 0;
+        const otp = parts[1] || "-";
+        const tellerHp = parts[2] || "Admin";
+        const expiredAt = Number(parts[3]) || 0;
+
+        if ((expiredAt > 0 && Date.now() > expiredAt) || state.user.saldo < amount) {
+            autoRejectInsufficientOrExpired(amount, expiredAt > 0 && Date.now() > expiredAt);
+            return;
+        }
+
+        showModal(
+            "Otorisasi Tarik Tunai",
+            `Teller (<strong>${tellerHp}</strong>) mengajukan penarikan tunai sebesar <strong>${formatRp(amount)}</strong> dari rekening Anda.<br>` +
+            `<div class="otp-badge" style="margin-top:8px;">KODE: ${otp}</div><br>` +
+            `Masukkan <strong>PIN Akun</strong> untuk menyetujui:`,
+            `<input type="password" inputmode="numeric" maxlength="6" id="approveTarikPin" placeholder="••••••" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--border); color:#fff; border-radius:8px; text-align:center; font-size:1.2rem;">`,
+            `<button class="btn-sm" style="flex:1; padding:12px;" onclick="rejectTarik()">Tolak</button>
+             <button class="btn-primary btn-success" id="btnApproveTarik" style="flex:1; margin:0;" onclick="confirmTarik(${amount}, '${tellerHp}')">Setujui</button>`
+        );
+    }
+
+    async function confirmTarik(amount, tellerHp) {
+        if (state.isBusy) return;
+        const pin = document.getElementById('approveTarikPin').value.trim();
+        const check = await verifyPinWithStatus(pin, state.user.pass);
+        if (!check.valid) return alert("PIN salah!");
+
+        if (state.user.saldo < amount) {
+            await sendPost({ type: "requestTarik", trxId: generateRefId("REJ-BAL"), hp: state.user.hp, pin: "" });
+            await syncData();
+            closeModal();
+            return showModal(
+                "Ditolak Otomatis (Saldo Kurang)",
+                `Penarikan sebesar <strong>${formatRp(amount)}</strong> otomatis ditolak karena saldo Anda (<strong>${formatRp(state.user.saldo)}</strong>) tidak mencukupi.`
+            );
+        }
+
+        state.isBusy = true;
+        const btn = document.getElementById('btnApproveTarik');
+        if (btn) btn.disabled = true;
+
+        try {
+            const newSaldo = state.user.saldo - amount;
+            closeModal();
+
+            const now = new Date();
+            const ts = now.getTime();
+            const timeStr = now.toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const refId = generateRefId("TRK");
+
+            const entryDebit = {
+                refId, trxId: refId, timestamp: ts, time: timeStr,
+                hp: normalizeHp(state.user.hp), user: state.user.name,
+                counterpartyHp: normalizeHp(tellerHp), counterpartyName: "Teller",
+                title: `Tarik Tunai (Teller: ${tellerHp})`,
+                debit: amount, kredit: 0, runningBalance: newSaldo,
+                amount: `-${formatRp(amount)}`, petugas: tellerHp, color: "var(--danger)"
+            };
+
+            const res = await sendPost({
+                type: "tarikTunai",
+                refId,
+                trxId: refId,
+                senderHp: normalizeHp(state.user.hp),
+                senderSaldo: newSaldo,
+                user: state.user.name,
+                petugas: tellerHp,
+                title: entryDebit.title,
+                time: timeStr,
+                timestamp: ts,
+                amount: `-${formatRp(amount)}`,
+                color: "var(--danger)",
+                entries: [entryDebit]
+            });
+
+            if (res && res.status === "rejected") {
+                await syncData();
+                return showModal("Tarik Tunai Ditolak", res.message || "Saldo tidak mencukupi atau tiket kedaluwarsa.");
+            }
+            if (res && res.status === "network_error") {
+                await syncData();
+                return showModal("Status Jaringan Belum Pasti", res.message);
+            }
+
+            const finalSaldo = typeof res.senderSaldo === "number" ? res.senderSaldo : newSaldo;
+            state.user.saldo = finalSaldo;
+            renderBalance();
+            await syncData();
+
+            showReceipt({
+                refId,
+                jenis: "TARIK TUNAI",
+                nama: state.user.name,
+                hp: normalizeHp(state.user.hp),
+                nominal: amount,
+                saldo: finalSaldo,
+                waktu: timeStr,
+                petugas: tellerHp
+            });
+        } finally {
+            state.isBusy = false;
+        }
+    }
+
+    async function rejectTarik() {
+        await sendPost({ type: "requestTarik", trxId: generateRefId("REJ"), hp: state.user.hp, pin: "" });
+        closeModal();
+        showModal("Dibatalkan", "Permintaan penarikan tunai ditolak.");
+    }
+
+    function infoTarikTunai() {
+        showModal("Penarikan Tunai", "Silakan kunjungi Teller / Admin RT dengan membawa perangkat Anda. Setelah Teller menginput nominal, layar aplikasi Anda akan menampilkan kode verifikasi dan meminta PIN konfirmasi.");
+    }
+
+    // --- QR CODE & SCANNER ---
+    function renderMyQR() {
+        document.getElementById('qrOwnerName').textContent = state.user.name;
+        document.getElementById('qrOwnerHp').textContent = `No. Rekening: ${normalizeHp(state.user.hp)}`;
+        const box = document.getElementById('qrcode');
+        box.innerHTML = "";
+        QRCode.toCanvas(document.createElement('canvas'), `REK:${normalizeHp(state.user.hp)}`, { width: 180, margin: 1 }, (err, canvas) => {
+            if (!err) box.appendChild(canvas);
+        });
+    }
+
+    function openScanner(context) {
+        state.scanContext = context;
+        navigate('scanner');
+        setTimeout(() => {
+            state.scannerInstance = new Html5Qrcode("qr-reader");
+            state.scannerInstance.start(
+                { facingMode: "environment" },
+                { fps: 15, qrbox: { width: 180, height: 180 } },
+                (decoded) => {
+                    const hp = normalizeHp(decoded.replace(/^REK:/i, '').trim());
+                    stopScanner();
+                    if (state.scanContext === 'setor') {
+                        selectedSetorHp = hp;
+                        document.getElementById('setorTarget').value = hp;
+                        navigate('setorAdmin');
+                    } else {
+                        selectedTfHp = hp;
+                        document.getElementById('tfTarget').value = hp;
+                        navigate('transfer');
+                    }
+                },
+                () => {}
+            ).catch(() => showModal("Kamera Gagal", "Pastikan izin kamera diaktifkan pada browser."));
+        }, 200);
+    }
+
+    function stopScanner() {
+        if (state.scannerInstance) {
+            const ref = state.scannerInstance;
+            state.scannerInstance = null;
+            ref.stop().then(() => ref.clear()).catch(() => {});
+        }
+    }
+
+    // --- MUTATIONS, FILTER, SORT & CETAK PDF (@media print + window.print) ---
+    function populateMutationFilters(resetYearIfNeeded = false) {
+        const memberBox = document.getElementById('adminMemberFilterBox');
+        const memberSel = document.getElementById('filterMember');
+        const yearSel = document.getElementById('filterYear');
+
+        if (state.user && state.user.isAdmin) {
+            memberBox.style.display = 'flex';
+            const prevMember = memberSel.value;
+            memberSel.innerHTML = `<option value="ALL">Semua Nasabah</option>` +
+                state.members.map(m => `<option value="${normalizeHp(m.hp)}">${m.name} (${normalizeHp(m.hp)})</option>`).join('');
+            if (prevMember && [...memberSel.options].some(o => o.value === prevMember)) {
+                memberSel.value = prevMember;
+            }
+        } else {
+            memberBox.style.display = 'none';
+        }
+
+        const years = new Set([new Date().getFullYear()]);
+        state.mutations.forEach(m => {
+            if (m.year) years.add(m.year);
+        });
+        const sortedYears = [...years].sort((a, b) => b - a);
+        const prevYear = yearSel.value;
+        yearSel.innerHTML = `<option value="ALL">Semua Tahun</option>` +
+            sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
+        if (!resetYearIfNeeded && prevYear && [...yearSel.options].some(o => o.value === prevYear)) {
+            yearSel.value = prevYear;
+        }
+    }
+
+    function getFilteredMutations() {
+        const isAdmin = !!(state.user && state.user.isAdmin);
+        const selectedMemberHp = isAdmin ? document.getElementById('filterMember').value : normalizeHp(state.user.hp);
+        const monthVal = document.getElementById('filterMonth').value;
+        const yearVal = document.getElementById('filterYear').value;
+        const sortVal = document.getElementById('filterSort').value;
+
+        let list = state.mutations.filter(m => {
+            if (!isAdmin) {
+                const matchHp = m.hp && normalizeHp(m.hp) === normalizeHp(state.user.hp);
+                const matchName = m.user === state.user.name || (m.title && m.title.includes(state.user.name));
+                if (!matchHp && !matchName) return false;
+            } else if (selectedMemberHp !== "ALL") {
+                const matchHp = m.hp && normalizeHp(m.hp) === selectedMemberHp;
+                const memObj = state.members.find(x => normalizeHp(x.hp) === selectedMemberHp);
+                const matchName = memObj && (m.user === memObj.name || (m.title && m.title.includes(memObj.name)));
+                if (!matchHp && !matchName) return false;
+            }
+
+            if (monthVal !== "ALL" && String(m.month) !== monthVal) return false;
+            if (yearVal !== "ALL" && String(m.year) !== yearVal) return false;
+            return true;
+        });
+
+        list.sort((a, b) => sortVal === "ASC" ? a.timestamp - b.timestamp : b.timestamp - a.timestamp);
+
+        const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const memberLabel = !isAdmin
+            ? `${state.user.name} (${normalizeHp(state.user.hp)})`
+            : (selectedMemberHp === "ALL"
+                ? "Semua Nasabah"
+                : (() => {
+                    const found = state.members.find(x => normalizeHp(x.hp) === selectedMemberHp);
+                    return found ? `${found.name} (${normalizeHp(found.hp)})` : selectedMemberHp;
+                })());
+
+        const periodLabel = `${monthVal === "ALL" ? "Semua Bulan" : monthNames[parseInt(monthVal, 10)]} ${yearVal === "ALL" ? "Semua Tahun" : yearVal}`;
+        const sortLabel = sortVal === "ASC" ? "Terlama ke Terbaru" : "Terbaru ke Terlama";
+
+        state.lastFilteredMutations = list;
+        state.lastFilterMeta = { memberLabel, periodLabel, sortLabel, selectedMemberHp };
+        return list;
+    }
+
+    function renderMutations() {
+        const listEl = document.getElementById('mutasiList');
+        const items = getFilteredMutations();
+
+        let totalCredit = 0;
+        let totalDebit = 0;
+        items.forEach(m => {
+            totalCredit += Number(m.kredit) || 0;
+            totalDebit += Number(m.debit) || 0;
+        });
+
+        document.getElementById('sumCredit').textContent = `+${formatRp(totalCredit)}`;
+        document.getElementById('sumDebit').textContent = `-${formatRp(totalDebit)}`;
+
+        listEl.innerHTML = items.length
+            ? items.map(m => {
+                const isCredit = (m.kredit || 0) > 0;
+                const amtText = isCredit ? `+${formatRp(m.kredit)}` : `-${formatRp(m.debit)}`;
+                const balText = m.runningBalance !== null && !isNaN(m.runningBalance)
+                    ? ` • Saldo: ${formatRp(m.runningBalance)}`
+                    : "";
+                return `
+                    <div class="list-item">
+                        <div>
+                            <div style="font-weight:600;">${m.title}</div>
+                            <small style="color:var(--muted);">${m.displayTime} • Ref: ${m.refId}${balText}</small>
+                            ${state.user.isAdmin ? `<br><small style="color:#64748b;">Nasabah: ${m.user} (${m.hp || '-'}) • Petugas: ${m.petugas}</small>` : ''}
+                        </div>
+                        <strong style="color:${m.color}; white-space:nowrap;">${amtText}</strong>
+                    </div>`;
+            }).join('')
+            : `<div class="list-item" style="justify-content:center; color:var(--muted);">Tidak ada mutasi sesuai filter</div>`;
+    }
+
+    function printStatementHtml(htmlContent) {
+        const container = document.getElementById('printableStatementContainer');
+        container.innerHTML = htmlContent;
+        window.print();
+    }
+
+    function exportMutasiPDF() {
+        const items = getFilteredMutations();
+        const meta = state.lastFilterMeta;
+
+        let totalCredit = 0;
+        let totalDebit = 0;
+        items.forEach(m => {
+            totalCredit += Number(m.kredit) || 0;
+            totalDebit += Number(m.debit) || 0;
+        });
+
+        const rowsHtml = items.length
+            ? items.map(m => {
+                const balStr = m.runningBalance !== null && !isNaN(m.runningBalance) ? formatRp(m.runningBalance) : "-";
+                return `
+                    <tr>
+                        <td>${m.refId}</td>
+                        <td>${m.displayTime}</td>
+                        <td>${m.title}<br><span style="color:#64748b; font-size:10px;">Rek: ${m.user} (${m.hp || '-'}) | Petugas: ${m.petugas}</span></td>
+                        <td class="num">${m.debit ? formatRp(m.debit) : "-"}</td>
+                        <td class="num">${m.kredit ? formatRp(m.kredit) : "-"}</td>
+                        <td class="num">${balStr}</td>
+                    </tr>`;
+            }).join('')
+            : `<tr><td colspan="6" style="text-align:center; padding:16px;">Tidak ada data transaksi pada periode/filter yang dipilih.</td></tr>`;
+
+        const htmlContent = `
+            <div class="print-header">
+                <div>
+                    <h2>LAPORAN MUTASI REKENING TABUNGAN WARGA</h2>
+                    <div style="font-size:12px; color:#475569;">Rekening Koran & Riwayat Transaksi Terverifikasi • Status: TERCATAT</div>
+                </div>
+                <div style="text-align:right; font-size:11px; color:#475569;">
+                    Dicetak: ${new Date().toLocaleString('id-ID')}
+                </div>
+            </div>
+            <div class="print-meta">
+                <strong>Nasabah / Cakupan:</strong> ${meta.memberLabel}<br>
+                <strong>Periode:</strong> ${meta.periodLabel} &nbsp;|&nbsp; <strong>Urutan:</strong> ${meta.sortLabel} &nbsp;|&nbsp; <strong>Pengurus/Petugas Cetak:</strong> ${state.user.name} (${normalizeHp(state.user.hp)})
+            </div>
+            <div class="print-summary">
+                <div class="print-sum-card">
+                    <span>Total Kredit (Masuk)</span>
+                    <strong style="color:#15803d;">+${formatRp(totalCredit)}</strong>
+                </div>
+                <div class="print-sum-card">
+                    <span>Total Debit (Keluar)</span>
+                    <strong style="color:#b91c1c;">-${formatRp(totalDebit)}</strong>
+                </div>
+                <div class="print-sum-card">
+                    <span>Selisih Bersih Periode</span>
+                    <strong>${formatRp(totalCredit - totalDebit)}</strong>
+                </div>
+            </div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th>No. Ref</th>
+                        <th>Waktu</th>
+                        <th>Keterangan Transaksi</th>
+                        <th class="num">Debit</th>
+                        <th class="num">Kredit</th>
+                        <th class="num">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+            <div class="print-footer">
+                <span>Dokumen sah catatan kas & tabungan warga.</span>
+                <span>Jumlah Baris: ${items.length} transaksi</span>
+            </div>
+        `;
+
+        printStatementHtml(htmlContent);
+    }
+
+    function renderRekap() {
+        const totalSaldo = state.members.reduce((acc, m) => acc + (Number(m.saldo) || 0), 0);
+        document.getElementById('rekapCount').textContent = `${state.members.length} Rek`;
+        document.getElementById('rekapTotalSaldo').textContent = formatRp(totalSaldo);
+
+        document.getElementById('rekapList').innerHTML = state.members.map((m, idx) => `
+            <div class="list-item">
+                <div><strong>${idx + 1}. ${m.name}</strong><br><small style="color:var(--muted);">No. Rek: ${normalizeHp(m.hp)} • Role: ${m.role || 'warga'}</small></div>
+                <strong style="color:var(--success);">${formatRp(m.saldo)}</strong>
+            </div>`).join('');
+    }
+
+    function exportRekapPDF() {
+        const totalSaldo = state.members.reduce((acc, m) => acc + (Number(m.saldo) || 0), 0);
+        const rows = state.members.map((m, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${m.name}</td>
+                <td>${normalizeHp(m.hp)}</td>
+                <td>${m.role || 'warga'}</td>
+                <td class="num">${formatRp(m.saldo)}</td>
+            </tr>
+        `).join('');
+
+        const htmlContent = `
+            <div class="print-header">
+                <div>
+                    <h2>REKAPITULASI SALDO TABUNGAN WARGA</h2>
+                    <div style="font-size:12px; color:#475569;">Posisi Saldo Seluruh Rekening Aktif • Status: TERVERIFIKASI</div>
+                </div>
+                <div style="text-align:right; font-size:11px; color:#475569;">
+                    Dicetak: ${new Date().toLocaleString('id-ID')}
+                </div>
+            </div>
+            <div class="print-meta">
+                <strong>Jumlah Rekening:</strong> ${state.members.length} &nbsp;|&nbsp; <strong>Total Dana Kelolaan:</strong> ${formatRp(totalSaldo)} &nbsp;|&nbsp; <strong>Pengurus/Petugas Cetak:</strong> ${state.user.name} (${normalizeHp(state.user.hp)})
+            </div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Nasabah</th>
+                        <th>No. Rekening</th>
+                        <th>Peran</th>
+                        <th class="num">Saldo Akhir</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div class="print-footer">
+                <span>Dokumen sah rekapitulasi saldo tabungan warga.</span>
+                <span>Total Rekening: ${state.members.length}</span>
+            </div>
+        `;
+
+        printStatementHtml(htmlContent);
+    }
+
+    function renderNasabah() {
+        document.getElementById('nasabahList').innerHTML = state.members.map((m, idx) => {
+            const isProtectedAdmin = idx === 0 || String(m.role || "").toLowerCase() === "admin";
+            const pinStatus = (!m.pass || m.pass === "1234")
+                ? `<span style="color:#fbbf24;">• Perlu Buat PIN</span>`
+                : `<span style="color:#4ade80;">• PIN Aktif</span>`;
+
+            const resetBtn = `<button class="btn-sm btn-reset" onclick="resetNasabahPin('${m.hp}', '${m.name.replace(/'/g, "\\'")}')">Reset PIN</button>`;
+            const delBtn = isProtectedAdmin
+                ? `<span style="font-size:0.72rem; color:var(--muted); font-weight:600; align-self:center;">Admin Utama</span>`
+                : `<button class="btn-sm btn-logout" onclick="deleteNasabah('${m.hp}')">Hapus</button>`;
+
+            return `
+                <div class="list-item">
+                    <div>
+                        <strong>${m.name}</strong><br>
+                        <small style="color:var(--muted);">${normalizeHp(m.hp)} • ${formatRp(m.saldo)} ${pinStatus}</small>
+                    </div>
+                    <div class="item-actions">
+                        ${resetBtn}
+                        ${delBtn}
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    async function resetNasabahPin(hp, name) {
+        if (state.isBusy) return;
+        if (!confirm(`Reset PIN untuk ${name} (${normalizeHp(hp)})? Nasabah harus membuat PIN baru saat login berikutnya.`)) return;
+
+        state.isBusy = true;
+        try {
+            const resp = await sendPost({ type: "resetPin", trxId: generateRefId("RST"), hp: normalizeHp(hp), petugas: state.user.hp });
+            if (resp.status !== "ok") return showModal("Gagal", resp.message || "Gagal mereset PIN.");
+            await syncData();
+            renderNasabah();
+            showModal("PIN Direset", `PIN untuk <strong>${name}</strong> (${normalizeHp(hp)}) telah direset. Minta nasabah masuk dan membuat PIN baru.`);
+        } finally {
+            state.isBusy = false;
+        }
+    }
+
+    function showAddMemberModal() {
+        showModal(
+            "Registrasi Nasabah Baru",
+            "Nasabah akan diminta membuat PIN pribadi saat login pertama kali.",
+            `<input type="text" id="newMemName" placeholder="Nama Lengkap" style="width:100%; padding:10px; margin-bottom:8px; background:var(--bg); border:1px solid var(--border); color:#fff; border-radius:8px;">
+             <input type="tel" id="newMemHp" placeholder="Nomor HP (Rekening)" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); color:#fff; border-radius:8px;">`,
+            `<button class="btn-sm" style="flex:1; padding:12px;" onclick="closeModal()">Batal</button>
+             <button class="btn-primary" style="flex:1; margin:0;" onclick="saveNewMember()">Simpan</button>`
+        );
+    }
+
+    async function saveNewMember() {
+        if (state.isBusy) return;
+        const name = document.getElementById('newMemName').value.trim();
+        const hp = normalizeHp(document.getElementById('newMemHp').value.trim());
+        if (!name || !hp || hp.length < 8) return alert("Nama dan Nomor HP valid wajib diisi.");
+        if (state.members.some(m => normalizeHp(m.hp) === hp)) return alert("Nomor rekening sudah terdaftar.");
+
+        state.isBusy = true;
+        try {
+            closeModal();
+            const resp = await sendPost({ type: "addMember", trxId: generateRefId("MBR"), name, hp, saldo: 0, pass: "", petugas: state.user.hp });
+            if (resp.status !== "ok") return showModal("Gagal", resp.message || "Gagal menambah nasabah.");
+            await syncData();
+            renderNasabah();
+        } finally {
+            state.isBusy = false;
+        }
+    }
+
+    async function deleteNasabah(hp) {
+        if (state.isBusy) return;
+        const idx = state.members.findIndex(m => normalizeHp(m.hp) === normalizeHp(hp));
+        if (idx === 0 || String(state.members[idx]?.role || "").toLowerCase() === "admin") {
+            return showModal("Akses Dibatasi", "Akun Admin utama (pendaftar pertama) tidak dapat dihapus dari aplikasi.");
+        }
+        if (!confirm("Hapus rekening nasabah ini?")) return;
+
+        state.isBusy = true;
+        try {
+            const resp = await sendPost({ type: "deleteMember", trxId: generateRefId("DEL"), hp: normalizeHp(hp), petugas: state.user.hp });
+            if (resp.status !== "ok") return showModal("Gagal", resp.message || "Gagal menghapus rekening.");
+            await syncData();
+            renderNasabah();
+        } finally {
+            state.isBusy = false;
+        }
+    }
+
+    // --- RECEIPT & MODAL HELPERS ---
+    function exportReceiptPDF() {
+        const d = state.lastReceipt;
+        if (!d) return;
+
+        const htmlContent = `
+            <div class="print-receipt-wrap">
+                <div class="print-receipt-top">
+                    <div class="print-receipt-brand">
+                        <h2>TABUNGAN WARGA</h2>
+                        <p>Bukti Transaksi Digital Resmi • Layanan Kas & Simpanan</p>
+                    </div>
+                    <div class="print-receipt-badge">Berhasil</div>
+                </div>
+
+                <div class="print-receipt-amount-box">
+                    <span>Nominal Transaksi</span>
+                    <strong>${formatRp(d.nominal)}</strong>
+                </div>
+
+                <table class="print-receipt-table">
+                    <tr>
+                        <td class="label">No. Referensi</td>
+                        <td class="val" style="font-family: monospace;">${d.refId}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Jenis Transaksi</td>
+                        <td class="val">${d.jenis}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Nama / Keterangan</td>
+                        <td class="val">${d.nama}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">No. Rekening</td>
+                        <td class="val">${normalizeHp(d.hp)}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Saldo Akhir</td>
+                        <td class="val" style="color:#15803d; font-weight:700;">${formatRp(d.saldo)}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Petugas / Diproses Oleh</td>
+                        <td class="val">${d.petugas}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Waktu Transaksi</td>
+                        <td class="val">${d.waktu}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Waktu Cetak</td>
+                        <td class="val">${new Date().toLocaleString('id-ID')}</td>
+                    </tr>
+                </table>
+
+                <div class="print-receipt-foot">
+                    Dokumen ini merupakan bukti transaksi sah yang diterbitkan secara digital oleh sistem Tabungan Warga.<br>
+                    Simpan atau unduh sebagai PDF untuk arsip pembukuan Anda.
+                </div>
+            </div>
+        `;
+
+        printStatementHtml(htmlContent);
+    }
+
+    function showReceipt(data) {
+        state.lastReceipt = data;
+        const waPhone = formatWaNumber(data.hp);
+        const waText = encodeURIComponent(
+            `*BUKTI TRANSAKSI TABUNGAN WARGA*\n` +
+            `No. Ref: ${data.refId}\nJenis: ${data.jenis}\nNama: ${data.nama}\nRekening: ${normalizeHp(data.hp)}\n` +
+            `Nominal: ${formatRp(data.nominal)}\n` +
+            `Saldo Akhir: ${formatRp(data.saldo)}\nWaktu: ${data.waktu}`
+        );
+
+        const waButtonHtml = waPhone
+            ? `<a href="whatsapp://send?phone=${waPhone}&text=${waText}" class="btn-primary btn-success" style="text-decoration:none; margin:0; flex:1; display:flex; align-items:center; justify-content:center; font-size:0.85rem; padding:10px;">Kirim WA</a>`
+            : `<button class="btn-sm" style="flex:1;" disabled>No. WA Kosong</button>`;
+
+        showModal(
+            "Transaksi Berhasil",
+            "Bukti transaksi digital telah diterbitkan:",
+            `<div class="receipt">
+                <div style="text-align:center; border-bottom:1px dashed #94a3b8; padding-bottom:6px; margin-bottom:8px;"><strong>BUKTI TRANSAKSI DIGITAL</strong></div>
+                <div class="receipt-row"><span>No. Ref:</span><strong>${data.refId}</strong></div>
+                <div class="receipt-row"><span>Jenis:</span><strong>${data.jenis}</strong></div>
+                <div class="receipt-row"><span>Nama:</span><strong>${data.nama}</strong></div>
+                <div class="receipt-row"><span>Rekening:</span><span>${normalizeHp(data.hp)}</span></div>
+                <div class="receipt-row"><span>Nominal:</span><strong>${formatRp(data.nominal)}</strong></div>
+                <div class="receipt-row"><span>Saldo Akhir:</span><strong>${formatRp(data.saldo)}</strong></div>
+                <div class="receipt-row"><span>Petugas:</span><span>${data.petugas}</span></div>
+                <div class="receipt-row"><span>Waktu:</span><span>${data.waktu}</span></div>
+            </div>`,
+            `${waButtonHtml}
+             <button class="btn-primary" style="margin:0; flex:1; font-size:0.85rem; padding:10px;" onclick="exportReceiptPDF()">🖨️ PDF Struk</button>
+             <button class="btn-sm" style="flex:0.8;" onclick="closeModal()">Tutup</button>`
+        );
+    }
+
+    function showModal(title, desc, customHtml = "", actionsHtml = "") {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalDesc').innerHTML = desc;
+        document.getElementById('modalCustom').innerHTML = customHtml;
+        document.getElementById('modalActions').innerHTML = actionsHtml || `<button class="btn-primary" style="margin:0;" onclick="closeModal()">Tutup</button>`;
+        document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    function setStatus(msg) {
+        document.getElementById('statusBar').textContent = msg;
+    }
+
+    // Init
+    ensureDefaultSchema();
+    applySavedHpToAuthInput(true);
+    syncData();
+    setInterval(syncData, 6000);
+</script>
 </body>
 </html>
